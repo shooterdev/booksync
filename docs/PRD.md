@@ -40,6 +40,10 @@ L'application fonctionne en architecture distribuée : Raspberry Pi (frontend) +
 
 > Voir [COMMON.md § Sources de données](./COMMON.md#2-sources-de-données) pour le détail complet.
 
+### Dépôts Git
+
+> Voir [COMMON.md § Architecture Git](./COMMON.md#11-architecture-git) pour la structure multi-repos avec submodules.
+
 ---
 
 ## 2. Fonctionnalités

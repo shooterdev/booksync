@@ -472,11 +472,22 @@ qml/components/
 
 ## 8. Configuration et déploiement
 
-### 8.1 Variables d'environnement
+### 8.1 Dépôts Git
+
+> Voir [COMMON.md § Architecture Git](./COMMON.md#11-architecture-git) pour la structure multi-repos avec submodules.
+
+Le projet est organisé en monorepo avec submodules :
+
+```bash
+# Cloner le projet complet
+git clone --recurse-submodules git@github.com:shooterdev/booksync.git
+```
+
+### 8.2 Variables d'environnement
 
 > Voir [COMMON.md § Variables d'environnement](./COMMON.md#5-variables-denvironnement) pour la liste complète.
 
-### 8.2 Déploiement Raspberry Pi
+### 8.3 Déploiement Raspberry Pi
 
 ```bash
 # Cloner le dépôt
@@ -490,7 +501,7 @@ uv sync
 uv run python -m booksync_app_qt
 ```
 
-### 8.3 Déploiement Backend (Docker)
+### 8.4 Déploiement Backend (Docker)
 
 > Voir le fichier [`docker_compose.yml`](../docker_compose.yml) à la racine du projet.
 
@@ -517,7 +528,7 @@ docker-compose down
 | Data API       | 8001 | Build local              |
 | Prediction API | 8002 | Build local (profile v3) |
 
-### 8.4 Auto-démarrage Raspberry Pi
+### 8.5 Auto-démarrage Raspberry Pi
 
 ```bash
 # /etc/systemd/system/booksync.service

@@ -19,6 +19,7 @@ Ce fichier centralise les informations partagées entre
 8. [Clean Architecture](#8-clean-architecture)
 9. [Flux d'authentification](#9-flux-dauthentification)
 10. [Flux de données](#10-flux-de-données)
+11. [Architecture Git](#11-architecture-git)
 
 ---
 
@@ -373,3 +374,104 @@ L'application suit une architecture hexagonale stricte où les dépendances poin
                                                     │ Mangacollec (OAuth) │
                                                     └─────────────────────┘
 ```
+
+---
+
+## 11. Architecture Git
+
+### 11.1 Structure multi-repos
+
+Le projet utilise une architecture **monorepo + submodules** pour séparer les responsabilités tout en maintenant une orchestration centralisée.
+
+```
+shooterdev/booksync                    # Monorepo principal (orchestration)
+├── shooterdev/booksync-api-auth       # Submodule → Service d'authentification
+├── shooterdev/booksync-api-data       # Submodule → Service de données extra
+├── shooterdev/booksync-api-prediction # Submodule → Service de recommandations V3
+└── shooterdev/booksync-app-qt         # Submodule → Application desktop PySide6/QML
+```
+
+### 11.2 Correspondance repos ↔ dossiers
+
+| Repo GitHub                          | Dossier local              | Description                      |
+|--------------------------------------|----------------------------|----------------------------------|
+| `shooterdev/booksync`                | `/` (racine)               | Monorepo principal               |
+| `shooterdev/booksync-api-auth`       | `booksync_api_auth/`       | Auth API - JWT & OAuth2 (8000)   |
+| `shooterdev/booksync-api-data`       | `booksync_api_data/`       | Data API - Données extra (8001)  |
+| `shooterdev/booksync-api-prediction` | `booksync_api_prediction/` | Prediction API - Reco V3 (8002)  |
+| `shooterdev/booksync-app-qt`         | `booksync_app_qt/`         | App desktop PySide6/QML          |
+
+### 11.3 Contenu du monorepo
+
+Le monorepo principal contient uniquement les fichiers d'orchestration et de documentation :
+
+```
+booksync/
+├── .gitmodules                    # Configuration des submodules
+├── docker_compose.yml             # Orchestration Docker de tous les services
+├── docs/
+│   ├── PRD.md                     # Spécification produit
+│   ├── ARCHITECTURE.md            # Architecture technique
+│   └── COMMON.md                  # Référence commune
+├── .env.example                   # Variables d'environnement globales
+├── CLAUDE.md                      # Configuration Claude Code
+├── .claude/                       # Prompts et configuration Claude
+├── openspec/                      # Spécifications OpenAPI
+│
+├── booksync_api_auth/             # Submodule
+├── booksync_api_data/             # Submodule
+├── booksync_api_prediction/       # Submodule
+└── booksync_app_qt/               # Submodule
+```
+
+### 11.4 Commandes Git essentielles
+
+**Cloner le projet complet :**
+
+```bash
+# Clone avec tous les submodules
+git clone --recurse-submodules git@github.com:shooterdev/booksync.git
+
+# Ou après un clone simple
+git submodule update --init --recursive
+```
+
+**Mettre à jour les submodules :**
+
+```bash
+# Mettre à jour tous les submodules vers leur dernière version
+git submodule update --remote --merge
+
+# Mettre à jour un submodule spécifique
+git submodule update --remote booksync_api_auth
+```
+
+**Travailler dans un submodule :**
+
+```bash
+# Naviguer dans le submodule
+cd booksync_api_auth
+
+# Les commits sont indépendants du monorepo
+git add .
+git commit -m "feat: nouvelle fonctionnalité"
+git push
+
+# Revenir au monorepo et enregistrer la nouvelle référence
+cd ..
+git add booksync_api_auth
+git commit -m "chore: update booksync-api-auth submodule"
+git push
+```
+
+### 11.5 CI/CD
+
+Chaque service peut avoir son propre pipeline CI/CD dans son repo :
+
+| Repo                       | CI/CD                                    |
+|----------------------------|------------------------------------------|
+| `booksync-api-auth`        | Tests unitaires, lint, build Docker      |
+| `booksync-api-data`        | Tests unitaires, lint, build Docker      |
+| `booksync-api-prediction`  | Tests unitaires, lint, build Docker      |
+| `booksync-app-qt`          | Tests unitaires, lint, build PyInstaller |
+| `booksync` (monorepo)      | Tests d'intégration, orchestration       |
