@@ -168,3 +168,43 @@ light
 - service data_api dans booksync_api_data/
 - service prediction dans booksync_api_prediction/
 - app dans booksync_app_qt/
+
+
+
+
+Ajoute ces informations dans mon @CLAUDE.md ne retouche pas à l'existant 
+dans le fichier.
+
+Aperçu de l'objectif du projet
+
+Aperçu de l'architecture globale
+
+Style visuel :
+- Interface claire et minimaliste
+- Pas de mode sombre pour le MVP
+
+Contraintes et Politiques :
+- NE JAMAIS exposer les clés API dans le code source
+- Utiliser des variables d'environnement ou un fichier de configuration sécurisé
+
+Dépendances :
+- Préférer les composants Qt/PySide6 existants plutôt que d'ajouter de nouvelles bibliothèques UI
+
+À la fin de chaque développement qui implique l'interface graphique :
+- Lancer l'application et vérifier les logs de la console pour les erreurs QML/Qt
+- Utiliser l'arbre d'accessibilité Qt ou un dump de l'object tree pour valider la structure UI
+- S'assurer que l'interface est fonctionnelle et répond au besoin développé
+- Fournir un screenshot si demandé pour validation visuelle
+
+Documentation :
+- Ajoute une section documentation avec les liens vers @PRD.md & @ARCHITECTURE.md & @COMMON.md & @DOCKER.md 
+
+Context7 :
+Utilise toujours context7 lorsque j'ai besoin de génération de code, d'étapes de configuration ou d'installation, 
+ou de documentation de bibliothèque/API (notamment PySide6, Qt). Cela signifie que tu dois automatiquement utiliser 
+les outils MCP Context7 pour résoudre l'identifiant de bibliothèque et obtenir la documentation de bibliothèque 
+sans que j'aie à le demander explicitement.
+
+Note : Toutes les spécifications doivent être rédigées en français, y compris les specs 
+OpenSpec (sections Purpose et Scenarios). Seuls les titres de Requirements doivent rester en anglais avec les mots-clés 
+SHALL/MUST pour la validation OpenSpec.

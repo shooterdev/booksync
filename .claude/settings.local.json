@@ -7,6 +7,7 @@
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
+    "context7",
     "python-sdk",
     "docker",
     "jupyter",

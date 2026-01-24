@@ -503,10 +503,34 @@ uv run python -m booksync_app_qt
 
 ### 8.4 Déploiement Backend (Docker)
 
-> Voir le fichier [`docker_compose.yml`](../docker_compose.yml) à la racine du projet.
+> **Documentation complète** : Voir [DOCKER.md](./DOCKER.md) pour le guide détaillé des images, commandes et configurations.
+
+#### Résumé des services
+
+| Service         | Image                            | Port | Base           | Utilisateur BDD      |
+|-----------------|----------------------------------|------|----------------|----------------------|
+| PostgreSQL      | `pgvector/pgvector:pg17`         | 5432 | PostgreSQL 17  | `postgres` (admin)   |
+| Auth API        | `booksync-api-auth:latest`       | 8000 | Python 3.12    | `booksync_auth`      |
+| Data API        | `booksync-api-data:latest`       | 8001 | Python 3.12    | `booksync_data`      |
+| Prediction API  | `booksync-api-prediction:latest` | 8002 | Python 3.12    | `booksync_prediction`|
+
+> **Architecture** : Base de données PostgreSQL unique partagée par tous les services, avec utilisateurs distincts pour la sécurité.
+> **Architectures supportées** : `linux/amd64` et `linux/arm64` (Raspberry Pi).
+
+#### Commandes rapides
 
 ```bash
-# Démarrage des services (Auth API + Data API)
+# Build local (architecture courante)
+docker build -t booksync-api-auth:latest ./booksync_api_auth
+docker build -t booksync-api-data:latest ./booksync_api_data
+docker build -t booksync-api-prediction:latest ./booksync_api_prediction
+
+# Build multi-architecture (arm64 + amd64)
+docker buildx build --platform linux/amd64,linux/arm64 -t booksync-api-auth:latest --push ./booksync_api_auth
+docker buildx build --platform linux/amd64,linux/arm64 -t booksync-api-data:latest --push ./booksync_api_data
+docker buildx build --platform linux/amd64,linux/arm64 -t booksync-api-prediction:latest --push ./booksync_api_prediction
+
+# Démarrage des services
 docker-compose up -d
 
 # Avec Prediction API (V3)
@@ -519,14 +543,7 @@ docker-compose logs -f
 docker-compose down
 ```
 
-**Services déployés :**
-
-| Service        | Port | Image                    |
-|----------------|------|--------------------------|
-| PostgreSQL 17  | 5432 | `pgvector/pgvector:pg17` |
-| Auth API       | 8000 | Build local              |
-| Data API       | 8001 | Build local              |
-| Prediction API | 8002 | Build local (profile v3) |
+> Pour les commandes avancées (debugging, réseau, volumes, production), consulter [DOCKER.md](./DOCKER.md).
 
 ### 8.5 Auto-démarrage Raspberry Pi
 
