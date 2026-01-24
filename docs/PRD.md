@@ -715,13 +715,21 @@ booksync_app_qt/
 │   │
 │   ├── application/             # Cas d'usage
 │   │   ├── services/
-│   │   │   ├── collection_service.py
-│   │   │   ├── reading_service.py
-│   │   │   ├── search_service.py
-│   │   │   ├── planning_service.py
-│   │   │   ├── sync_service.py
-│   │   │   ├── prediction_service.py  # V3
-│   │   │   └── ...
+│   │   │   ├── auth_service.py        # MVP - Authentification
+│   │   │   ├── sync_service.py        # MVP - Synchronisation API/Cache
+│   │   │   ├── collection_service.py  # MVP - Possessions
+│   │   │   ├── search_service.py      # MVP - Recherche (V1: +auteurs/éditeurs)
+│   │   │   ├── catalog_service.py     # MVP - Fiches Volume/Série/Édition
+│   │   │   ├── planning_service.py    # V1  - Sorties à venir
+│   │   │   ├── wishlist_service.py    # V1  - Envies
+│   │   │   ├── reading_service.py     # V2  - Pile à lire
+│   │   │   ├── stats_service.py       # V2  - Statistiques
+│   │   │   ├── history_service.py     # V2  - Historique
+│   │   │   ├── cart_service.py        # V2  - Panier
+│   │   │   ├── scanner_service.py     # V2  - Code-barres
+│   │   │   ├── prediction_service.py  # V3  - Recommandations
+│   │   │   ├── loan_service.py        # V4+ - Prêts
+│   │   │   └── user_service.py        # V4+ - Multi-utilisateur
 │   │   └── dtos/
 │   │       ├── volume_dto.py
 │   │       └── ...
@@ -916,6 +924,85 @@ ListView {
         onClicked: stackView.push("details/VolumeDetailPage.qml", { volumeId: volumeId })
     }
 }
+```
+
+### 6.7 Mapping Services ↔ Versions
+
+Cette section définit quels services doivent être développés pour chaque version.
+
+#### MVP — Services Core
+
+| Service               | Fichier                 | Responsabilités                                         |
+|-----------------------|-------------------------|---------------------------------------------------------|
+| **AuthService**       | `auth_service.py`       | Authentification, gestion tokens, connexion Mangacollec |
+| **SyncService**       | `sync_service.py`       | Synchronisation API ↔ Cache, gestion hors-ligne         |
+| **CollectionService** | `collection_service.py` | Possessions (ajouter/retirer tomes)                     |
+| **SearchService**     | `search_service.py`     | Recherche titres (V1 : + auteurs/éditeurs)              |
+| **CatalogService**    | `catalog_service.py`    | Lecture fiches Volume/Série/Édition                     |
+
+#### V1 — Services Quotidiens
+
+| Service             | Fichier               | Responsabilités                                  |
+|---------------------|-----------------------|--------------------------------------------------|
+| **PlanningService** | `planning_service.py` | Sorties à venir, planning personnalisé/global    |
+| **WishlistService** | `wishlist_service.py` | Envies (calcul dynamique depuis follow_editions) |
+| **SearchService**   | `search_service.py`   | Extension : recherche auteurs + éditeurs         |
+
+#### V2 — Services Lecture & Avancés
+
+| Service            | Fichier              | Responsabilités                                      |
+|--------------------|----------------------|------------------------------------------------------|
+| **ReadingService** | `reading_service.py` | Pile à lire, progression, marquer comme lu           |
+| **StatsService**   | `stats_service.py`   | Statistiques collection (graphiques, répartitions)   |
+| **HistoryService** | `history_service.py` | Historique ajouts + lectures (journal chronologique) |
+| **CartService**    | `cart_service.py`    | Panier d'achats, calcul budget, sync boutiques       |
+| **ScannerService** | `scanner_service.py` | Lecture code-barres ISBN, ajout rapide               |
+
+#### V3 — Services Recommandation
+
+| Service               | Fichier                 | Responsabilités                                          |
+|-----------------------|-------------------------|----------------------------------------------------------|
+| **PredictionService** | `prediction_service.py` | QCM préférences, sélection humeur, algorithme suggestion |
+
+#### V4+ — Services Hors-périmètre
+
+| Service         | Fichier           | Responsabilités                        |
+|-----------------|-------------------|----------------------------------------|
+| **LoanService** | `loan_service.py` | Gestion des prêts (emprunteurs, suivi) |
+| **UserService** | `user_service.py` | Multi-utilisateur, profils séparés     |
+
+#### Schéma de dépendances
+
+```
+MVP:
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│ AuthService │────►│ SyncService │────►│ CacheManager│
+└─────────────┘     └──────┬──────┘     └─────────────┘
+                           │
+         ┌─────────────────┼─────────────────┐
+         ▼                 ▼                 ▼
+┌─────────────┐     ┌─────────────┐   ┌─────────────┐
+│ Collection  │     │   Search    │   │  Catalog    │
+│   Service   │     │   Service   │   │  Service    │
+└─────────────┘     └─────────────┘   └─────────────┘
+
+V1:                 V2:                 V3:
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  Planning   │     │  Reading    │     │ Prediction  │
+│  Service    │     │  Service    │     │  Service    │
+├─────────────┤     ├─────────────┤     └─────────────┘
+│  Wishlist   │     │   Stats     │
+│  Service    │     │  Service    │
+└─────────────┘     ├─────────────┤
+                    │  History    │
+                    │  Service    │
+                    ├─────────────┤
+                    │   Cart      │
+                    │  Service    │
+                    ├─────────────┤
+                    │  Scanner    │
+                    │  Service    │
+                    └─────────────┘
 ```
 
 ---
