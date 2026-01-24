@@ -1,0 +1,529 @@
+# Ralph Progress Log
+Started: 2026-01-23
+Feature: 09-qt-frontend
+
+## Codebase Patterns
+
+### Architecture
+- **Clean Architecture hexagonale** : domain/ → application/ → infrastructure/
+- **PySide6 avec QML** : UI déclarative, logique en Python
+- **APIs Backend** : auth (port 8000), data (port 8001)
+
+### Patterns PySide6/QML
+- QQmlApplicationEngine pour charger QML
+- QAbstractListModel pour exposer données Python à QML
+- @Slot decorator pour méthodes appelables depuis QML
+- Signal/Slot pour communication bidirectionnelle
+- QSettings pour persistance locale (JWT, préférences)
+
+### Charte Graphique (OBLIGATOIRE)
+- primary: #fc3117
+- background: #000
+- card: rgb(18,18,18)
+- text: rgb(229,229,231)
+- textDetail: #AAA
+- border: rgb(60,60,67)
+- read: #536DFE
+- cart: #f38f21
+
+### Conventions
+- Nommage: CamelCase pour QML, snake_case pour Python
+- Fichiers QML: PascalCase (MangaCard.qml, HomePage.qml)
+- Fichiers Python: snake_case (auth_service.py, manga_model.py)
+- Résolution cible: 1280x720 (Raspberry Pi)
+
+## Key Files
+
+### Structure à créer
+- booksync_app_qt/src/booksync_app_qt/main.py
+- booksync_app_qt/src/booksync_app_qt/qml/main.qml
+- booksync_app_qt/src/booksync_app_qt/qml/theme/Theme.qml
+- booksync_app_qt/src/booksync_app_qt/qml/components/Sidebar.qml
+- booksync_app_qt/src/booksync_app_qt/qml/components/MangaCard.qml
+- booksync_app_qt/src/booksync_app_qt/qml/pages/LoginPage.qml
+- booksync_app_qt/src/booksync_app_qt/qml/pages/HomePage.qml
+- booksync_app_qt/src/booksync_app_qt/qml/pages/CollectionPage.qml
+- booksync_app_qt/src/booksync_app_qt/models/manga_model.py
+- booksync_app_qt/src/booksync_app_qt/services/auth_service.py
+- booksync_app_qt/src/booksync_app_qt/services/data_service.py
+
+### Fichiers de référence existants
+- CLAUDE.md (charte graphique, conventions)
+- booksync_api_auth/pyproject.toml (structure pyproject)
+- docs/user_stories/US-013.md (interface principale)
+- docs/user_stories/US-032.md (page accueil)
+
+---
+
+## 2026-01-23 - QT-001: Créer structure projet booksync_app_qt avec pyproject.toml
+- **Implémenté:**
+  - Structure complète booksync_app_qt/src/booksync_app_qt/ avec qml/, models/, services/
+  - pyproject.toml basé sur booksync_api_auth avec PySide6, aiohttp, pydantic
+  - Dockerfile avec toutes les dépendances X11/Qt pour conteneurisation
+  - docker-compose.yml avec réseau booksync et volumes persistants
+  - main.py avec QQmlApplicationEngine prêt
+  - main.qml placeholder avec couleurs de la charte
+
+- **Fichiers créés:**
+  - booksync_app_qt/pyproject.toml
+  - booksync_app_qt/Dockerfile
+  - booksync_app_qt/docker-compose.yml
+  - booksync_app_qt/README.md
+  - booksync_app_qt/src/booksync_app_qt/__init__.py
+  - booksync_app_qt/src/booksync_app_qt/main.py
+  - booksync_app_qt/src/booksync_app_qt/models/__init__.py
+  - booksync_app_qt/src/booksync_app_qt/services/__init__.py
+  - booksync_app_qt/src/booksync_app_qt/qml/main.qml
+
+- **Learnings:**
+  - setuptools.packages.find avec `where = ["src"]` pour structure src layout
+  - PySide6 6.6+ requiert Python 3.11+
+  - Pour Qt GUI dans Docker: nombreuses libs X11/XCB nécessaires
+  - `project.gui-scripts` pour entry point GUI (booksync-gui)
+  - Path(__file__).parent pour localiser les fichiers QML relatifs au module
+
+---
+
+## 2026-01-23 - QT-002: Configurer thème QML avec couleurs charte graphique
+- **Implémenté:**
+  - Theme.qml singleton avec QtObject et toutes les couleurs du mode sombre
+  - Couleurs light mode préparées pour implémentation future
+  - qmldir pour déclarer le singleton importable
+  - main.py modifié avec addImportPath() pour charger le thème
+  - main.qml utilise maintenant Theme.background et Theme.primary
+
+- **Fichiers créés/modifiés:**
+  - booksync_app_qt/src/booksync_app_qt/qml/theme/Theme.qml (nouveau)
+  - booksync_app_qt/src/booksync_app_qt/qml/theme/qmldir (nouveau)
+  - booksync_app_qt/src/booksync_app_qt/main.py (modifié)
+  - booksync_app_qt/src/booksync_app_qt/qml/main.qml (modifié)
+
+- **Learnings:**
+  - Pour un singleton QML: `pragma Singleton` en haut du fichier + `qmldir` avec `singleton Theme 1.0 Theme.qml`
+  - `engine.addImportPath(str(qml_dir))` permet d'ajouter des chemins d'import personnalisés
+  - QtObject est idéal pour les singletons de données (pas de composant visuel)
+  - `Qt.rgba()` accepte des valeurs 0-1, utiliser division pour RGB 0-255
+  - Test headless possible avec `QT_QPA_PLATFORM=offscreen`
+
+---
+
+## 2026-01-23 - QT-003: Créer main.qml avec ApplicationWindow de base
+- **Implémenté:**
+  - main.qml modifié pour utiliser ApplicationWindow (QtQuick.Controls) au lieu de Window
+  - main.py mis à jour pour utiliser QApplication au lieu de QGuiApplication
+  - Fenêtre configurée avec taille 1280x720 et fond Theme.background (noir)
+
+- **Fichiers modifiés:**
+  - booksync_app_qt/src/booksync_app_qt/qml/main.qml
+  - booksync_app_qt/src/booksync_app_qt/main.py
+
+- **Learnings:**
+  - ApplicationWindow vient de QtQuick.Controls, pas de QtQuick.Window
+  - Pour Qt Quick Controls, préférer QApplication à QGuiApplication pour meilleure compatibilité styles
+  - Test headless possible avec `QT_QPA_PLATFORM=offscreen python3`
+  - ApplicationWindow apparaît comme `ApplicationWindow_QMLTYPE_X` dans metaObject().className()
+
+---
+
+## 2026-01-23 - QT-004: Implémenter Sidebar.qml avec icônes navigation
+- **Implémenté:**
+  - Sidebar.qml avec 5 boutons de navigation (Accueil, Collection, Planning, Recherche, Paramètres)
+  - SidebarButton.qml composant réutilisable avec états hover/selected
+  - Icônes Unicode pour chaque bouton (⌂, ☰, ☷, ⌕, ⚙)
+  - Signal navigationRequested(pageName) émis au clic
+  - qmldir pour le module Components
+  - Intégration dans main.qml avec affichage de la page courante
+
+- **Fichiers créés/modifiés:**
+  - booksync_app_qt/src/booksync_app_qt/qml/components/Sidebar.qml (nouveau)
+  - booksync_app_qt/src/booksync_app_qt/qml/components/SidebarButton.qml (nouveau)
+  - booksync_app_qt/src/booksync_app_qt/qml/components/qmldir (nouveau)
+  - booksync_app_qt/src/booksync_app_qt/qml/main.qml (modifié)
+
+- **Learnings:**
+  - Pour importer un module local, utiliser `import "components"` (chemin relatif) plutôt que `import Components`
+  - Layout.fillHeight ne fonctionne que dans ColumnLayout/RowLayout, pas dans Column/Row
+  - Les icônes Unicode sont une alternative simple aux icônes externes (pas de fichiers supplémentaires)
+  - ToolTip permet d'afficher un label au survol avec un délai configurable
+  - Behavior on color avec ColorAnimation pour des transitions fluides
+
+---
+
+## 2026-01-23 - QT-005: Ajouter StackView pour navigation entre pages
+- **Implémenté:**
+  - StackView ajouté dans main.qml pour navigation entre pages
+  - 5 pages placeholder créées: HomePage, CollectionPage, PlanningPage, SearchPage, SettingsPage
+  - Transitions animées avec opacity et translation pour push/pop/replace
+  - Navigation connectée via signal navigationRequested de Sidebar
+  - État de navigation mémorisé via currentPageName property
+  - qmldir pour le module Pages
+
+- **Fichiers créés/modifiés:**
+  - booksync_app_qt/src/booksync_app_qt/qml/pages/HomePage.qml (nouveau)
+  - booksync_app_qt/src/booksync_app_qt/qml/pages/CollectionPage.qml (nouveau)
+  - booksync_app_qt/src/booksync_app_qt/qml/pages/PlanningPage.qml (nouveau)
+  - booksync_app_qt/src/booksync_app_qt/qml/pages/SearchPage.qml (nouveau)
+  - booksync_app_qt/src/booksync_app_qt/qml/pages/SettingsPage.qml (nouveau)
+  - booksync_app_qt/src/booksync_app_qt/qml/pages/qmldir (nouveau)
+  - booksync_app_qt/src/booksync_app_qt/qml/main.qml (modifié)
+
+- **Learnings:**
+  - StackView.replace() est préférable à push() pour navigation principale (évite d'empiler les pages)
+  - Pour charger dynamiquement un fichier QML: `stackView.replace("pages/PageName.qml")`
+  - Les transitions se définissent via pushEnter/pushExit, popEnter/popExit, replaceEnter/replaceExit
+  - PropertyAnimation avec Easing.InOutQuad donne des transitions fluides
+  - Pages placeholder doivent être des `Item` avec Rectangle comme contenu pour bien fonctionner dans StackView
+  - Import relatif des pages: `import "pages"` dans main.qml
+  - initialItem du StackView peut être un composant inline: `initialItem: HomePage {}`
+
+---
+
+## 2026-01-23 - QT-007: Créer LoginPage.qml
+- **Implémenté:**
+  - LoginPage.qml avec formulaire de connexion centré et responsive
+  - TextField pour username avec placeholder et focus styling
+  - TextField pour password avec echoMode: Password
+  - Bouton "Se connecter" avec couleur Theme.primary et états hover/pressed
+  - Message d'erreur affiché en Theme.primary (rouge)
+  - Signal loginRequested(username, password) émis après validation
+  - Validation basique (champs non vides)
+  - Propriétés isLoading et errorMessage pour gestion externe
+  - BusyIndicator overlay pendant le chargement
+  - Méthode reset() pour réinitialiser le formulaire
+
+- **Fichiers créés/modifiés:**
+  - booksync_app_qt/src/booksync_app_qt/qml/pages/LoginPage.qml (nouveau)
+  - booksync_app_qt/src/booksync_app_qt/qml/pages/qmldir (modifié)
+
+- **Learnings:**
+  - ColumnLayout avec Layout.fillWidth pour formulaires responsive
+  - TextField background customisé avec Rectangle (radius, border dynamique)
+  - activeFocus property pour détecter le focus et changer la bordure
+  - echoMode: TextInput.Password pour masquer le mot de passe
+  - onAccepted: sur TextField permet de gérer la touche Entrée
+  - BusyIndicator avec Rectangle overlay semi-transparent pour état loading
+  - forceActiveFocus() pour déplacer le focus programmatiquement
+  - Component.onCompleted pour initialiser le focus au chargement
+  - Qt.darker() et Qt.lighter() pour variations de couleur sur les états
+
+---
+
+## 2026-01-23 - QT-006: Créer modèles Python QAbstractListModel de base
+- **Implémenté:**
+  - BaseListModel classe de base avec méthodes rowCount, data, roleNames, set_items, append_item, clear
+  - MangaModel héritant de BaseListModel avec rôles: id, title, coverUrl, author
+  - Modèle exposé à QML via engine.rootContext().setContextProperty("mangaModel", manga_model)
+  - Données de test ajoutées (One Piece, Naruto, Dragon Ball)
+
+- **Fichiers créés/modifiés:**
+  - booksync_app_qt/src/booksync_app_qt/models/base_model.py (nouveau)
+  - booksync_app_qt/src/booksync_app_qt/models/manga_model.py (nouveau)
+  - booksync_app_qt/src/booksync_app_qt/models/__init__.py (modifié)
+  - booksync_app_qt/src/booksync_app_qt/main.py (modifié)
+
+- **Learnings:**
+  - Les rôles personnalisés commencent à `Qt.UserRole + 1` pour éviter les conflits avec les rôles standard
+  - `roleNames()` retourne un dict[int, bytes] où les valeurs sont des bytes (b"roleName")
+  - Le modèle doit être créé AVANT d'appeler `engine.load()` pour être disponible en QML
+  - `engine.rootContext().setContextProperty("name", object)` expose un objet Python au contexte QML
+  - `beginResetModel()`/`endResetModel()` et `beginInsertRows()`/`endInsertRows()` sont essentiels pour notifier QML des changements
+  - Convention: snake_case pour les clés dict Python (cover_url), camelCase pour les rôles QML (coverUrl)
+
+---
+
+## 2026-01-23 - QT-008: Implémenter auth_service.py pour appel API
+- **Implémenté:**
+  - AuthService classe QObject avec @Slot pour login() et logout()
+  - AuthWorker (QThread) pour exécuter les appels HTTP async sans bloquer l'UI
+  - Appel HTTP POST vers /api/v1/auth/login avec aiohttp
+  - Signaux Qt pour communiquer résultats: loginSucceeded, loginFailed, logoutSucceeded, logoutFailed
+  - Gestion complète des erreurs: 401, 403, 429, 500, timeout, network errors
+  - AuthError enum pour typer les erreurs
+  - TokenData dataclass pour stocker les tokens
+  - Méthodes getAccessToken(), getRefreshToken(), isLoggedIn() exposées à QML
+
+- **Fichiers créés/modifiés:**
+  - booksync_app_qt/src/booksync_app_qt/services/auth_service.py (nouveau)
+  - booksync_app_qt/src/booksync_app_qt/services/__init__.py (modifié)
+
+- **Learnings:**
+  - Pour les appels HTTP async avec Qt, utiliser QThread + asyncio.run() évite de bloquer l'UI
+  - Les signaux Qt doivent avoir des types simples (str, int, bool) pour être compatibles QML
+  - aiohttp.ClientTimeout pour gérer les timeouts de manière propre
+  - aiohttp.ClientConnectorError pour détecter les erreurs de connexion serveur
+  - @Slot decorator nécessaire pour exposer les méthodes Python à QML
+  - Signal avec plusieurs arguments: Signal(str, str, str, int) puis emit(v1, v2, v3, v4)
+  - QThread.finished signal pour nettoyer après la fin du thread worker
+  - Les messages d'erreur en français pour une meilleure UX
+
+---
+
+## 2026-01-23 - QT-009: Binding QML ↔ Python pour authentification
+- **Implémenté:**
+  - AuthService exposé comme context property via engine.rootContext().setContextProperty()
+  - LoginPage connecté à authService.login() via onLoginRequested handler
+  - Connections QML pour écouter les signaux AuthService (loginSucceeded, loginFailed, loadingChanged)
+  - Navigation automatique vers HomePage après login réussi (isAuthenticated = true)
+  - État isLoading synchronisé avec loadingChanged pour afficher le spinner
+  - Sidebar et StackView cachés quand non authentifié
+  - Fonction logout() ajoutée dans main.qml pour déconnexion
+
+- **Fichiers créés/modifiés:**
+  - booksync_app_qt/src/booksync_app_qt/main.py (modifié - import et exposition AuthService)
+  - booksync_app_qt/src/booksync_app_qt/qml/main.qml (modifié - binding complet)
+
+- **Learnings:**
+  - Pour connecter signaux Python vers QML: utiliser `Connections { target: monService }` avec `function onSignalName(args) {}`
+  - Les noms de handlers QML suivent la convention `on<SignalName>` (camelCase avec préfixe on)
+  - `visible: property` sur composants QML permet de montrer/cacher dynamiquement sans destroy/recreate
+  - Pour passer plusieurs paramètres d'un Signal Python vers QML: déclarer Signal(type1, type2, ...) puis dans QML `function onSignal(arg1, arg2, ...)`
+  - loginPage.reset() doit être appelé après login réussi pour nettoyer les champs
+  - Même si logout échoue côté serveur, faire le logout local pour meilleure UX
+
+---
+
+## 2026-01-23 - QT-010: Stocker JWT dans QSettings et gérer session
+- **Implémenté:**
+  - QSettings pour persistance des tokens (access_token, refresh_token, expires_at)
+  - Méthodes _save_tokens(), _load_tokens(), _clear_tokens() dans AuthService
+  - Méthode tryAutoLogin() appelable depuis QML pour restaurer la session
+  - Vérification de l'expiration du token via décodage JWT base64
+  - Signaux autoLoginSucceeded et autoLoginFailed pour notifier QML
+  - Écran de chargement au démarrage pendant la vérification de session
+  - Auto-login au Component.onCompleted de main.qml
+
+- **Fichiers modifiés:**
+  - booksync_app_qt/src/booksync_app_qt/services/auth_service.py
+  - booksync_app_qt/src/booksync_app_qt/qml/main.qml
+
+- **Learnings:**
+  - QSettings stocke par défaut dans ~/Library/Preferences (macOS) ou ~/.config (Linux)
+  - QSettings.sync() force l'écriture immédiate sur disque
+  - JWT est encodé en base64url, nécessite padding avant décodage: `payload += "=" * (4 - len(payload) % 4)`
+  - Pour éviter le "flash" de la page login au démarrage: utiliser une property isCheckingSession
+  - Signal sans arguments: `Signal()` puis `emit()` sans paramètres
+  - @Slot() sans paramètres pour méthode appelable depuis QML: `@Slot()` puis `def tryAutoLogin(self):`
+  - Toujours effacer les tokens localement même si logout serveur échoue (meilleure UX)
+  - Utiliser un buffer de 60 secondes avant expiration pour éviter les edge cases
+
+---
+
+## 2026-01-23 - QT-012: Implémenter HomePage.qml avec GridView
+- **Implémenté:**
+  - HomePage.qml avec GridView affichant les MangaCard
+  - Titre "Nouveautés" en haut avec couleur Theme.text
+  - ScrollView pour défiler le contenu
+  - Données connectées au mangaModel (context property Python)
+  - Espacement cohérent 20px (gridCellWidth = cardWidth + spacing)
+  - État vide affiché si aucune donnée
+  - Badge "NOUVEAU" sur les 3 premiers éléments
+
+- **Fichiers modifiés:**
+  - booksync_app_qt/src/booksync_app_qt/qml/pages/HomePage.qml
+
+- **Learnings:**
+  - Éviter de nommer des propriétés `cellWidth`/`cellHeight` car ce sont des propriétés réservées de GridView (FINAL)
+  - Utiliser un préfixe unique comme `gridCellWidth` pour éviter les conflits
+  - GridView avec delegate Item permet de centrer le MangaCard dans la cellule
+  - ScrollView + GridView avec anchors.fill pour un layout responsive
+  - `model.roleName` dans le delegate pour accéder aux données du modèle Python
+  - Les warnings de style Qt Controls natif ne sont pas bloquants en mode offscreen
+
+---
+
+## 2026-01-23 - QT-011: Créer MangaCard.qml composant réutilisable
+- **Implémenté:**
+  - MangaCard.qml avec couverture 230x320px, titre et auteur
+  - Badge optionnel avec couleurs conditionnelles (NOUVEAU=primary, EN COLLECTION=read)
+  - Effet hover avec Theme.stateHovered et scale animation (1.02x)
+  - Signal clicked() pour interaction
+  - Placeholder avec emoji et BusyIndicator pendant chargement image
+  - Image asynchrone pour ne pas bloquer l'UI
+
+- **Fichiers créés/modifiés:**
+  - booksync_app_qt/src/booksync_app_qt/qml/components/MangaCard.qml (nouveau)
+  - booksync_app_qt/src/booksync_app_qt/qml/components/qmldir (modifié)
+
+- **Learnings:**
+  - Image.asynchronous: true permet le chargement non-bloquant des images
+  - Image.status peut être Loading, Ready, Error pour gérer les états
+  - Transform Scale avec Behavior NumberAnimation pour effet zoom fluide au hover
+  - ColumnLayout.spacing + Layout.margins pour espacement cohérent
+  - Text.elide: Text.ElideRight pour tronquer le texte trop long avec "..."
+  - maximumLineCount + wrapMode pour limiter les lignes de texte
+  - Rectangle avec clip: true pour masquer les débordements (corners radius sur image)
+  - BusyIndicator.running contrôle à la fois l'animation et l'affichage (si visible)
+
+---
+
+## 2026-01-23 - QT-013: Connecter API Data avec data_service.py
+- **Implémenté:**
+  - DataService classe avec DataWorker (QThread) pour appels HTTP async
+  - Méthode getBooks() appelle GET http://localhost:8001/books
+  - Headers Authorization Bearer avec JWT récupéré depuis AuthService
+  - Signaux booksReceived, booksLoadFailed, loadingChanged pour communication QML
+  - DataService reçoit référence à AuthService et MangaModel pour injection de dépendances
+  - Transformation des données API vers format attendu par MangaModel
+  - main.qml appelle dataService.getBooks() après login/auto-login réussi
+
+- **Fichiers créés/modifiés:**
+  - booksync_app_qt/src/booksync_app_qt/services/data_service.py (nouveau)
+  - booksync_app_qt/src/booksync_app_qt/services/__init__.py (modifié)
+  - booksync_app_qt/src/booksync_app_qt/main.py (modifié)
+  - booksync_app_qt/src/booksync_app_qt/qml/main.qml (modifié)
+
+- **Learnings:**
+  - Injection de dépendances Python: passer les objets services/modèles au constructeur plutôt que via QML
+  - set_manga_model() permet de définir le modèle à mettre à jour sans le passer au constructeur
+  - Gérer les deux formats de réponse API: liste directe ou objet avec clé "items"/"books"
+  - Transformation de données: mapper les noms de champs API (titre, couverture_url) vers les noms attendus par le modèle (title, cover_url)
+  - Connections QML: target: dataService avec function onSignalName(args) pour écouter les signaux Python
+  - Appeler le service de données après login plutôt qu'au démarrage pour avoir le token disponible
+
+---
+
+## 2026-01-23 - QT-014: Ajouter chargement asynchrone des images
+- **Implémenté:**
+  - CachedImageProvider héritant de QQuickAsyncImageProvider pour chargement async
+  - CachedImageResponse + ImageLoader (QRunnable) pour téléchargement non-bloquant
+  - Cache disque dans ~/.cache/booksync/images/ avec hash MD5 des URLs
+  - MangaCard.qml utilise "image://cache/" + Qt.btoa(url) pour accéder au provider
+  - Gestion des erreurs avec icône ⚠️ et message "Image non disponible"
+  - BusyIndicator pendant le chargement
+
+- **Fichiers créés/modifiés:**
+  - booksync_app_qt/src/booksync_app_qt/services/image_provider.py (nouveau)
+  - booksync_app_qt/src/booksync_app_qt/services/__init__.py (modifié)
+  - booksync_app_qt/src/booksync_app_qt/main.py (modifié)
+  - booksync_app_qt/src/booksync_app_qt/qml/components/MangaCard.qml (modifié)
+
+- **Learnings:**
+  - QQuickAsyncImageProvider permet de créer des ImageProviders avec chargement async
+  - QQuickImageResponse.textureFactory() retourne QQuickTextureFactory.textureFactoryForImage(image)
+  - QRunnable + QThreadPool.globalInstance().start() pour exécuter du code hors du thread UI
+  - Qt.btoa() encode en base64 côté QML (utile pour passer des URLs complexes)
+  - Image { cache: true } cache les images déjà chargées côté QML
+  - engine.addImageProvider("cache", provider) enregistre le provider avec préfixe "image://cache/"
+  - Le hash MD5 de l'URL donne un nom de fichier unique pour le cache disque
+  - aiohttp dans asyncio.run() fonctionne bien dans un QRunnable
+
+---
+
+## 2026-01-23 - QT-015: Créer CollectionPage.qml avec TabBar
+- **Implémenté:**
+  - CollectionPage.qml avec TabBar et SwipeView synchronisés
+  - 3 onglets: Collection, Pile à lire, Envies
+  - TabButton personnalisés avec indicateur coloré (Theme.primary) quand actif
+  - SwipeView avec 3 Item placeholder pour chaque onglet
+  - Synchronisation bidirectionnelle TabBar ↔ SwipeView via Binding
+  - États vides avec emojis et messages explicatifs pour chaque onglet
+  - Animation ColorAnimation sur l'indicateur d'onglet actif
+
+- **Fichiers modifiés:**
+  - booksync_app_qt/src/booksync_app_qt/qml/pages/CollectionPage.qml
+
+- **Learnings:**
+  - TabBar + SwipeView: synchronisation via `currentIndex: tabBar.currentIndex` sur SwipeView et `onCurrentIndexChanged` pour sync inverse
+  - Binding QML pour synchronisation bidirectionnelle propre: `Binding { target: swipeView; property: "currentIndex"; value: tabBar.currentIndex }`
+  - TabButton personnalisé: `contentItem` pour le texte, `background` pour le fond et l'indicateur
+  - Pour un indicateur d'onglet actif: Rectangle imbriqué dans le background avec ancrage bottom
+  - ColumnLayout avec Layout.fillHeight pour que SwipeView prenne tout l'espace restant
+  - clip: true sur SwipeView pour éviter le débordement pendant les transitions
+  - Les états vides avec emoji + texte centré améliorent l'UX
+
+---
+
+## 2026-01-23 - QT-016: Implémenter onglet Collection (séries possédées)
+- **Implémenté:**
+  - CollectionModel héritant de BaseListModel avec rôles: id, title, coverUrl, author, ownedVolumes, totalVolumes
+  - SeriesItem.qml composant horizontal avec couverture thumbnail (60x84px), titre, auteur, et badge volume
+  - ListView dans CollectionPage.qml avec delegate SeriesItem
+  - DataService.getCollection() méthode pour récupérer les livres de la collection
+  - Signaux collectionReceived, collectionLoadFailed, collectionLoadingChanged
+  - Connexions QML pour écouter les signaux et mettre à jour l'UI
+  - État vide, état loading, et liste des séries
+  - Bouton refresh avec animation de rotation pendant le chargement
+
+- **Fichiers créés:**
+  - booksync_app_qt/src/booksync_app_qt/models/collection_model.py
+  - booksync_app_qt/src/booksync_app_qt/qml/components/SeriesItem.qml
+
+- **Fichiers modifiés:**
+  - booksync_app_qt/src/booksync_app_qt/models/__init__.py
+  - booksync_app_qt/src/booksync_app_qt/services/data_service.py
+  - booksync_app_qt/src/booksync_app_qt/main.py
+  - booksync_app_qt/src/booksync_app_qt/qml/components/qmldir
+  - booksync_app_qt/src/booksync_app_qt/qml/pages/CollectionPage.qml
+
+- **Learnings:**
+  - Pour importer des composants depuis un répertoire parent en QML: `import "../components" as Components`
+  - Un modèle peut avoir plusieurs workers indépendants (getBooks vs getCollection) avec signaux séparés
+  - RowLayout avec Layout.preferredWidth/Height pour les proportions fixes dans un layout horizontal
+  - RotationAnimation avec `loops: Animation.Infinite` pour une animation continue pendant le loading
+  - collectionModel.rowCount() pour vérifier le nombre d'éléments et afficher/cacher la liste
+  - Les composants delegate ListView ont accès aux rôles du modèle via `model.roleName`
+  - ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded } pour afficher la scrollbar uniquement si nécessaire
+
+---
+
+## 2026-01-23 - QT-017: Implémenter onglet Pile à lire (progressions)
+- **Implémenté:**
+  - ReadingProgressModel avec rôles: id, title, coverUrl, seriesTitle, readPages, totalPages, progressPercent
+  - ReadingItem.qml composant horizontal avec couverture, titre, série et ProgressBar custom
+  - DataService.getReadingProgress() méthode avec filtrage par statut 'en_cours'
+  - Signaux readingProgressReceived, readingProgressLoadFailed, readingProgressLoadingChanged
+  - Intégration dans l'onglet "Pile à lire" de CollectionPage avec lazy loading
+  - États: loading, empty, liste avec refresh button animé
+  - ProgressBar custom avec Rectangle (pas ProgressBar native) pour Theme.read
+
+- **Fichiers créés:**
+  - booksync_app_qt/src/booksync_app_qt/models/reading_progress_model.py
+  - booksync_app_qt/src/booksync_app_qt/qml/components/ReadingItem.qml
+
+- **Fichiers modifiés:**
+  - booksync_app_qt/src/booksync_app_qt/models/__init__.py
+  - booksync_app_qt/src/booksync_app_qt/services/data_service.py
+  - booksync_app_qt/src/booksync_app_qt/main.py
+  - booksync_app_qt/src/booksync_app_qt/qml/components/qmldir
+  - booksync_app_qt/src/booksync_app_qt/qml/pages/CollectionPage.qml
+
+- **Learnings:**
+  - Pour une ProgressBar custom, préférer 2 Rectangle imbriqués plutôt que ProgressBar native (plus de contrôle sur le style)
+  - `progressPercent` calculé directement dans le modèle Python évite la duplication de logique en QML
+  - Lazy loading d'onglet: `property bool isActive: swipeView.currentIndex === N` + `onIsActiveChanged` pour charger les données uniquement quand l'onglet devient visible
+  - Chaque worker peut avoir ses propres signaux pour éviter les conflits (readingProgressReceived vs collectionReceived)
+  - Le filtrage des données par statut peut se faire côté client (dans `_on_reading_progress_received`) en attendant un endpoint API dédié
+  - Behavior on width avec NumberAnimation pour animer la progression de la barre
+
+---
+
+## 2026-01-23 - QT-018: Implémenter onglet Envies (wishlist)
+- **Implémenté:**
+  - WishlistModel avec rôles: id, title, coverUrl, seriesTitle, estimatedPrice
+  - WishlistItem.qml composant horizontal avec couverture, titre, série et badge prix
+  - DataService.getWishlist() méthode avec signaux wishlistReceived/Failed/LoadingChanged
+  - Intégration dans l'onglet "Envies" de CollectionPage avec lazy loading
+  - Bouton "add to cart" avec icône 🛒 et hover animation
+  - États: loading, empty (avec emoji 💝), et liste avec refresh button animé
+
+- **Fichiers créés:**
+  - booksync_app_qt/src/booksync_app_qt/models/wishlist_model.py
+  - booksync_app_qt/src/booksync_app_qt/qml/components/WishlistItem.qml
+
+- **Fichiers modifiés:**
+  - booksync_app_qt/src/booksync_app_qt/models/__init__.py
+  - booksync_app_qt/src/booksync_app_qt/services/data_service.py
+  - booksync_app_qt/src/booksync_app_qt/main.py
+  - booksync_app_qt/src/booksync_app_qt/qml/components/qmldir
+  - booksync_app_qt/src/booksync_app_qt/qml/pages/CollectionPage.qml
+
+- **Learnings:**
+  - Pattern répété pour chaque onglet: Model + Worker + Item.qml + lazy loading = architecture scalable
+  - Pour le prix: `estimatedPrice.toFixed(2) + " €"` formate correctement en QML avec le symbole unicode \u20AC
+  - Un composant peut avoir plusieurs MouseArea si elles n'overlappent pas (clic sur l'item vs clic sur le bouton cart)
+  - Badge prix avec Rectangle + radius: 4 donne un rendu de "pill" élégant
+  - Couleur Theme.cart (#f38f21) utilisée pour les éléments liés aux achats/wishlist
+  - Le pattern `isActive: swipeView.currentIndex === N` + `onIsActiveChanged` est réutilisable pour tous les onglets avec lazy loading
+
+---
+

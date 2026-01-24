@@ -1,0 +1,12 @@
+[submodule "booksync_api_auth"]
+	path = booksync_api_auth
+	url = git@github.com:shooterdev/booksync-api-auth.git
+[submodule "booksync_api_data"]
+	path = booksync_api_data
+	url = git@github.com:shooterdev/booksync-api-data.git
+[submodule "booksync_api_prediction"]
+	path = booksync_api_prediction
+	url = git@github.com:shooterdev/booksync-api-prediction.git
+[submodule "booksync_app_qt"]
+	path = booksync_app_qt
+	url = git@github.com:shooterdev/booksync-app-qt.git

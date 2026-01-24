@@ -1,0 +1,29 @@
+# Ralph Progress Log
+Started: 2026-01-23
+Feature: 12-epic-002-collection
+
+## Codebase Patterns
+- Models: Extend BaseListModel, define _roles and _get_item_data
+- Models expose Properties with Signal for QML binding (e.g., @Property(int, notify=...))
+- Services: Add worker for async tasks, signals for loading states
+- QML components: Use Theme.* for colors, import "../components" as Components
+- Tab content loads data lazily via isActive property check
+
+---
+
+## 2026-01-23 - US-002-01: Consulter la pile à lire avec progression
+- Implemented reading pile with series-level volume progress
+- Files created:
+  - booksync_app_qt/src/booksync_app_qt/models/reading_pile_model.py
+  - booksync_app_qt/src/booksync_app_qt/qml/components/ReadingPileItem.qml
+- Files modified:
+  - models/__init__.py (export ReadingPileModel)
+  - main.py (create and expose readingPileModel)
+  - services/data_service.py (add getReadingPile with demo data)
+  - qml/pages/CollectionPage.qml (Tab 2 redesigned)
+- **Learnings:**
+  - Model needs Property decorators with notify signals for QML binding
+  - Stats (totalRead, totalToRead, globalProgress) computed from items
+  - Demo data used; will need API endpoint for production
+  - Progress bar uses Theme.read color for consistency
+---

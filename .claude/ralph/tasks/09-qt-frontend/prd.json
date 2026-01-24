@@ -1,0 +1,260 @@
+{
+  "branchName": "feat/09-qt-frontend",
+  "userStories": [
+    {
+      "id": "QT-001",
+      "title": "Créer structure projet booksync_app_qt avec pyproject.toml",
+      "acceptanceCriteria": [
+        "Dossier booksync_app_qt/ créé à la racine du projet",
+        "Structure: src/booksync_app_qt/ avec sous-dossiers qml/, models/, services/",
+        "pyproject.toml avec dépendances PySide6",
+        "Dockerfile et docker-compose.yml basiques",
+        "Le projet peut être installé avec pip install -e ."
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Suivre architecture hexagonale. Regarder booksync_api_auth/pyproject.toml comme référence."
+    },
+    {
+      "id": "QT-002",
+      "title": "Configurer thème QML avec couleurs charte graphique",
+      "acceptanceCriteria": [
+        "Fichier qml/theme/Theme.qml créé",
+        "Toutes les couleurs du mode sombre définies (primary #fc3117, background #000, etc.)",
+        "Theme.qml est un singleton QML importable",
+        "L'application démarre sans erreur"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Couleurs strictes définies dans CLAUDE.md. Utiliser QtObject avec properties."
+    },
+    {
+      "id": "QT-003",
+      "title": "Créer main.qml avec ApplicationWindow de base",
+      "acceptanceCriteria": [
+        "Fichier qml/main.qml créé",
+        "ApplicationWindow avec taille 1280x720",
+        "Fond avec couleur Theme.background",
+        "main.py charge et affiche la fenêtre QML",
+        "L'application démarre et affiche une fenêtre noire"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Utiliser QQmlApplicationEngine. Enregistrer Theme.qml comme singleton."
+    },
+    {
+      "id": "QT-004",
+      "title": "Implémenter Sidebar.qml avec icônes navigation",
+      "acceptanceCriteria": [
+        "Fichier qml/components/Sidebar.qml créé",
+        "Sidebar fixe à gauche (60-80px largeur)",
+        "5 boutons: Accueil, Collection, Planning, Recherche, Paramètres",
+        "Icônes visibles avec couleur Theme.icon",
+        "Signal émis au clic sur un bouton",
+        "L'application affiche la sidebar"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Utiliser Column avec Rectangle pour chaque bouton. Icônes depuis Qt Quick Controls."
+    },
+    {
+      "id": "QT-005",
+      "title": "Ajouter StackView pour navigation entre pages",
+      "acceptanceCriteria": [
+        "StackView ajouté dans main.qml",
+        "Navigation fonctionne depuis la Sidebar",
+        "Pages placeholder créées (HomePage.qml, CollectionPage.qml, etc.)",
+        "Transition animée entre pages",
+        "État de navigation mémorisé"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Connecter les signaux Sidebar aux push/replace du StackView."
+    },
+    {
+      "id": "QT-006",
+      "title": "Créer modèles Python QAbstractListModel de base",
+      "acceptanceCriteria": [
+        "Fichier models/base_model.py avec classe BaseListModel",
+        "Fichier models/manga_model.py avec MangaModel",
+        "Modèle expose les rôles: id, title, coverUrl, author",
+        "Modèle importable depuis QML via context property",
+        "L'application charge le modèle sans erreur"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Hériter de QAbstractListModel. Implémenter rowCount, data, roleNames."
+    },
+    {
+      "id": "QT-007",
+      "title": "Créer LoginPage.qml",
+      "acceptanceCriteria": [
+        "Fichier qml/pages/LoginPage.qml créé",
+        "Champs username et password avec TextField",
+        "Bouton 'Se connecter' avec couleur Theme.primary",
+        "Message d'erreur affiché si échec",
+        "Design centré et responsive",
+        "Signal loginRequested(username, password) émis au clic"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Utiliser ColumnLayout. Ajouter validation basique (champs non vides)."
+    },
+    {
+      "id": "QT-008",
+      "title": "Implémenter auth_service.py pour appel API",
+      "acceptanceCriteria": [
+        "Fichier services/auth_service.py créé",
+        "Classe AuthService avec méthodes login(username, password) et logout()",
+        "Appel HTTP POST vers http://localhost:8000/api/v1/auth/login",
+        "Retourne les tokens (access_token, refresh_token)",
+        "Gestion des erreurs (401, 500, timeout)"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "Utiliser aiohttp ou requests. Méthodes async compatibles avec Qt event loop."
+    },
+    {
+      "id": "QT-009",
+      "title": "Binding QML ↔ Python pour authentification",
+      "acceptanceCriteria": [
+        "AuthService exposé comme context property dans QML",
+        "LoginPage appelle authService.login() au clic",
+        "Résultat de login mis à jour dans QML (succès/erreur)",
+        "Navigation vers HomePage après login réussi",
+        "Spinner ou état loading pendant l'appel"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "Utiliser Signal/Slot Qt pour la communication. @Slot decorator pour méthodes Python."
+    },
+    {
+      "id": "QT-010",
+      "title": "Stocker JWT dans QSettings et gérer session",
+      "acceptanceCriteria": [
+        "JWT stocké dans QSettings après login",
+        "JWT récupéré au démarrage de l'app",
+        "Auto-login si JWT valide présent",
+        "Logout efface le JWT",
+        "Méthode isLoggedIn() disponible"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": "Utiliser QSettings pour persistance. Vérifier expiration du token."
+    },
+    {
+      "id": "QT-011",
+      "title": "Créer MangaCard.qml composant réutilisable",
+      "acceptanceCriteria": [
+        "Fichier qml/components/MangaCard.qml créé",
+        "Affiche couverture (Image), titre, auteur",
+        "Taille fixe: 230x320px pour couverture",
+        "Badge optionnel (NOUVEAU, EN COLLECTION)",
+        "Effet hover avec Theme.stateHovered",
+        "Signal clicked() émis"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": "Utiliser Rectangle avec Image et Column pour texte. Gérer placeholder si pas d'image."
+    },
+    {
+      "id": "QT-012",
+      "title": "Implémenter HomePage.qml avec GridView",
+      "acceptanceCriteria": [
+        "Fichier qml/pages/HomePage.qml créé",
+        "GridView avec 4-5 colonnes de MangaCard",
+        "Titre 'Nouveautés' en haut",
+        "ScrollView pour défiler",
+        "Données proviennent du MangaModel",
+        "Espacement cohérent (20px)"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": "GridView avec cellWidth/cellHeight calculés. Utiliser delegate: MangaCard."
+    },
+    {
+      "id": "QT-013",
+      "title": "Connecter API Data avec data_service.py",
+      "acceptanceCriteria": [
+        "Fichier services/data_service.py créé",
+        "Méthode get_books() appelle GET http://localhost:8001/books",
+        "Headers Authorization avec JWT",
+        "MangaModel mis à jour avec les données reçues",
+        "HomePage affiche les livres de l'API"
+      ],
+      "priority": 13,
+      "passes": true,
+      "notes": "Passer le token depuis AuthService. Parser la réponse JSON en objets Python."
+    },
+    {
+      "id": "QT-014",
+      "title": "Ajouter chargement asynchrone des images",
+      "acceptanceCriteria": [
+        "Images chargées de manière asynchrone (non bloquant)",
+        "Placeholder affiché pendant le chargement",
+        "Cache des images en mémoire ou disque",
+        "Pas de freeze de l'UI pendant le chargement",
+        "Gestion des erreurs (image non disponible)"
+      ],
+      "priority": 14,
+      "passes": true,
+      "notes": "CachedImageProvider avec QQuickAsyncImageProvider + QRunnable + cache disque."
+    },
+    {
+      "id": "QT-015",
+      "title": "Créer CollectionPage.qml avec TabBar",
+      "acceptanceCriteria": [
+        "Fichier qml/pages/CollectionPage.qml créé",
+        "TabBar avec 3 onglets: Collection, Pile à lire, Envies",
+        "SwipeView pour le contenu des onglets",
+        "Onglets avec couleur Theme.primary quand actifs",
+        "Navigation fluide entre onglets"
+      ],
+      "priority": 15,
+      "passes": true,
+      "notes": "Utiliser TabBar + SwipeView synchronisés. Chaque onglet est un Item séparé."
+    },
+    {
+      "id": "QT-016",
+      "title": "Implémenter onglet Collection (séries possédées)",
+      "acceptanceCriteria": [
+        "Onglet Collection affiche les séries de l'utilisateur",
+        "Chaque série montre: titre, couverture, nombre de tomes possédés",
+        "ListView avec délégué personnalisé",
+        "Données proviennent de l'API",
+        "Message si collection vide"
+      ],
+      "priority": 16,
+      "passes": true,
+      "notes": "CollectionModel créé avec rôles id, title, coverUrl, author, ownedVolumes, totalVolumes. SeriesItem.qml composant horizontal."
+    },
+    {
+      "id": "QT-017",
+      "title": "Implémenter onglet Pile à lire (progressions)",
+      "acceptanceCriteria": [
+        "Onglet Pile à lire affiche les livres en cours de lecture",
+        "Chaque item montre: couverture, titre, barre de progression",
+        "Barre de progression avec couleur Theme.read",
+        "Données proviennent de l'API (statut lecture)",
+        "Message si pile vide"
+      ],
+      "priority": 17,
+      "passes": true,
+      "notes": "Utiliser ProgressBar QML. Filtrer les livres avec statut 'en_cours'."
+    },
+    {
+      "id": "QT-018",
+      "title": "Implémenter onglet Envies (wishlist)",
+      "acceptanceCriteria": [
+        "Onglet Envies affiche la wishlist de l'utilisateur",
+        "Chaque item montre: couverture, titre, prix estimé",
+        "GridView ou ListView selon le nombre d'items",
+        "Données proviennent de l'API (endpoint wishlist)",
+        "Message si wishlist vide"
+      ],
+      "priority": 18,
+      "passes": true,
+      "notes": "Endpoint wishlist à vérifier dans l'API Data. Créer si nécessaire."
+    }
+  ]
+}

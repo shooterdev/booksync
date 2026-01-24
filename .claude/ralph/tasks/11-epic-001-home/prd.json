@@ -1,0 +1,55 @@
+{
+  "branchName": "feat/11-epic-001-home",
+  "epicRef": "docs/epic/EPIC-001-HOME.md",
+  "userStories": [
+    {
+      "id": "US-001-01",
+      "title": "Afficher la grille de nouveautés manga",
+      "description": "En tant que collecteur de manga, je veux voir les nouveautés manga disposées dans une grille claire afin de consulter les dernières sorties disponibles",
+      "acceptanceCriteria": [
+        "La grille affiche minimum 60+ volumes manga",
+        "Chaque carte affiche la couverture (230x320px), le titre de la série, le numéro de tome",
+        "Les cartes sont disposées en 4-5 colonnes selon la largeur d'écran",
+        "L'espacement entre cartes est de ~20px (gap)",
+        "Les badges DERNIER TOME s'affichent en couleur primaire pour les tomes finaux",
+        "Un checkmark en couleur primaire apparait si le volume est dans la collection",
+        "Les logos d'éditeurs s'affichent en bas-à-droite de chaque couverture"
+      ],
+      "priority": 1,
+      "passes": true
+    },
+    {
+      "id": "US-001-02",
+      "title": "Filtrer la grille par éditeur",
+      "description": "En tant que collecteur de manga, je veux pouvoir filtrer les nouveautés par éditeur afin de consulter uniquement les publications d'un éditeur spécifique",
+      "acceptanceCriteria": [
+        "Le bouton Éditeurs est positionné en haut-à-droite",
+        "Au clic, un dropdown menu affiche les éditeurs disponibles",
+        "La sélection d'un éditeur filtre la grille en temps réel",
+        "L'éditeur sélectionné est visuellement mis en avant dans le dropdown",
+        "Un bouton pour réinitialiser le filtre est disponible",
+        "Le nombre de volumes par éditeur est affiché dans le dropdown",
+        "La transition de filtrage est fluide (animation)"
+      ],
+      "priority": 2,
+      "passes": true
+    },
+    {
+      "id": "US-001-03",
+      "title": "Naviguer via la sidebar",
+      "description": "En tant que utilisateur de BookSync, je veux accéder aux différentes sections du site via une sidebar persistante afin de naviguer facilement entre les fonctionnalités principales",
+      "acceptanceCriteria": [
+        "La sidebar est visible et fixe à gauche (position sticky)",
+        "Le logo BookSync est cliquable et redirige vers l'accueil",
+        "Les 6 items de menu sont affichés: Nouveautés, Collection, Planning, Recherche, Panier, Compte",
+        "Le menu Nouveautés est surligné en couleur primaire indiquant la page active",
+        "Chaque lien navigation fonctionne et redirige vers la bonne URL",
+        "Les icones sont en style outline",
+        "La police est Lato 14px",
+        "La sidebar responsive se cache sur écrans < 768px"
+      ],
+      "priority": 1,
+      "passes": true
+    }
+  ]
+}

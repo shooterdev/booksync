@@ -1,0 +1,9 @@
+# Ralph Progress Log
+Started: 2026-01-23
+Feature: 14-epic-004-recherche
+
+## Codebase Patterns
+(Add discovered patterns here - Ralph will read these each iteration)
+
+---
+

@@ -1,0 +1,93 @@
+{
+  "branchName": "feat/12-epic-002-collection",
+  "epicRef": "docs/epic/EPIC-002-COLLECTION.md",
+  "userStories": [
+    {
+      "id": "US-002-01",
+      "title": "Consulter la pile à lire avec progression",
+      "description": "En tant que collecteur de mangas, je veux consulter ma pile à lire avec un suivi de la progression de lecture afin de suivre mes lectures en cours et mon avancement global",
+      "acceptanceCriteria": [
+        "Afficher le nombre total de tomes lus (ex: 910 TOMES LUS)",
+        "Afficher le nombre total de tomes à lire (ex: 1302 TOMES A LIRE)",
+        "Afficher une barre de progression globale avec pourcentage",
+        "Lister toutes les séries avec progression individuelle (X / Y tome(s))",
+        "Afficher une barre de progression fine pour chaque série",
+        "Permettre la navigation vers le détail d'une série via chevron droit",
+        "Respecter le style responsive (1280x720)"
+      ],
+      "priority": 1,
+      "passes": true
+    },
+    {
+      "id": "US-002-02",
+      "title": "Parcourir sa collection avec carrousel de couvertures",
+      "description": "En tant que collecteur passionné, je veux consulter ma collection complète avec un carrousel visuel des couvertures afin de avoir une vue d'ensemble attractive de mes possessions",
+      "acceptanceCriteria": [
+        "Afficher le nombre total de tomes (ex: 1797 TOMES)",
+        "Afficher le nombre total d'éditions (ex: 281 EDITIONS)",
+        "Lier vers une page de statistiques détaillées",
+        "Lister toutes les éditions avec progression individuelle",
+        "Afficher un carrousel horizontal de couvertures pour chaque édition",
+        "Charger les images depuis Amazon CDN",
+        "Permettre le scroll horizontal dans le carrousel avec chevrons",
+        "Afficher le statut optionnel (Edition en cours)",
+        "Rendre chaque édition cliquable pour accès aux détails"
+      ],
+      "priority": 1,
+      "passes": false
+    },
+    {
+      "id": "US-002-03",
+      "title": "Identifier les tomes manquants",
+      "description": "En tant que collectionneur cherchant à compléter ses séries, je veux avoir une liste des tomes manquants organisée par édition afin de identifier précisément les achats à faire",
+      "acceptanceCriteria": [
+        "Afficher le nombre total de tomes manquants (ex: 1283 TOMES MANQUANTS)",
+        "Afficher le nombre d'éditions incomplètes (ex: 177 EDITIONS INCOMPLETES)",
+        "Lister toutes les éditions avec tomes manquants",
+        "Afficher le nombre de tomes manquants pour chaque édition",
+        "Afficher le statut optionnel (Edition en cours)",
+        "Rendre chaque édition cliquable pour détails",
+        "Trier les éditions par pertinence ou alphabétiquement",
+        "Permettre le filtrage par statut"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "US-002-04",
+      "title": "Gérer sa liste d'envies (Wishlist)",
+      "description": "En tant que collecteur avec des envies spécifiques, je veux maintenir une liste des éditions souhaitées et suivre les tomes disponibles afin de planifier mes achats et rester informé des nouveautés",
+      "acceptanceCriteria": [
+        "Afficher le nombre d'éditions suivies en wishlist (ex: 57 EDITIONS SUIVIES)",
+        "Afficher le nombre total de tomes disponibles à l'achat (ex: 525 TOMES DISPONIBLES)",
+        "Afficher un icône cœur pour représenter la wishlist",
+        "Lister les éditions en wishlist avec progressions",
+        "Afficher un carrousel des couvertures disponibles pour chaque édition",
+        "Afficher le statut optionnel (Edition en cours)",
+        "Permettre l'ajout/suppression d'éditions à la wishlist",
+        "Trier par ordre d'ajout ou par pertinence",
+        "Supporter les coffrets spéciaux"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "US-002-05",
+      "title": "Gérer les prêts de mangas",
+      "description": "En tant que collecteur bienveillant, je veux prêter et suivre les mangas prêtés à d'autres utilisateurs ou lieux de stockage afin de partager ma collection et savoir où se trouvent mes mangas",
+      "acceptanceCriteria": [
+        "Afficher AUCUN TOME PRETE ou le nombre de tomes prêtés",
+        "Afficher une section TOMES STOCKES pour les lieux de stockage",
+        "Afficher un bouton PRETER pour créer un nouveau prêt",
+        "Grouper les prêts par emprunteur/lieu de stockage",
+        "Afficher le nom de l'emprunteur ou du lieu",
+        "Lister les éditions prêtées avec nombre de tomes",
+        "Permettre l'édition/suppression des prêts existants",
+        "Afficher la date de prêt et date de retour attendue",
+        "Supporter les retours partiels de tomes"
+      ],
+      "priority": 3,
+      "passes": false
+    }
+  ]
+}
