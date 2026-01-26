@@ -208,3 +208,13 @@ sans que j'aie à le demander explicitement.
 Note : Toutes les spécifications doivent être rédigées en français, y compris les specs 
 OpenSpec (sections Purpose et Scenarios). Seuls les titres de Requirements doivent rester en anglais avec les mots-clés 
 SHALL/MUST pour la validation OpenSpec.
+
+
+{
+  "username": "dev",
+  "email": "shooter.dev@gmail.com",
+  "password": "password",
+  "certify_adult": true,
+  "email_mangacollec": "shooter.dev@gmail.com",
+  "password_mangacollec": "Shooteroot59"
+}
