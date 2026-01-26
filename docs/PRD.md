@@ -271,6 +271,8 @@ L'application fonctionne en architecture distribuée : Raspberry Pi (frontend) +
 | `email`                | String(255) | Email (unique, indexé)             |
 | `password`             | String(255) | Password                           |
 | `password_mangacollec` | String(255) | Password mangacollec               |
+| `token`                | String(255) | token mangacollec                  |
+| `refresh_token`        | String(255) | refresh_token mangacollec          |
 
 ### 3.4 Collections Utilisateurs
 

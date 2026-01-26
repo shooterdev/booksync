@@ -556,14 +556,8 @@ cat backup_20240115.sql | docker exec -i booksync-postgres psql -U booksync book
 
 ```yaml
 # docker-compose.prod.yml
-version: '3.8'
 
 services:
-  # ============================================
-  # BASE DE DONNÉES PARTAGÉE
-  # Tous les services se connectent à cette BDD
-  # avec des utilisateurs différents
-  # ============================================
   postgres:
     image: pgvector/pgvector:pg17
     container_name: booksync-postgres
@@ -571,7 +565,7 @@ services:
     environment:
       POSTGRES_USER: ${DB_ADMIN_USER}
       POSTGRES_PASSWORD: ${DB_ADMIN_PASSWORD}
-      POSTGRES_DB: booksync
+      POSTGRES_DB: booksync_dev
     volumes:
       - booksync_pgdata:/var/lib/postgresql/data
       - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/01-init-db.sql

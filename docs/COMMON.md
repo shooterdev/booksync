@@ -91,18 +91,142 @@ Ce fichier centralise les informations partagées entre
 | Authentification | OAuth2 (Client ID + Secret)                                                       |
 | Données fournies | Séries, éditions, volumes, auteurs, éditeurs, planning, possessions, Read, etc... |
 
-**Endpoints principaux :**
+#### Endpoints par page (authentifié)
 
-| Endpoint                            | Usage                  |
+Les tableaux suivants détaillent les endpoints API Mangacollec appelés par chaque page de l'application.
+
+> **Note** : Les endpoints communs à toutes les pages authentifiées sont :
+> - `/v1/users/me` — Informations utilisateur courant
+> - `/v1/users/me/cart` — Panier utilisateur
+> - `/v1/users/me/recommendation` — Recommandations utilisateur
+
+##### Page News
+
+| Endpoint                         | Description              |
+|----------------------------------|--------------------------|
+| `GET /v2/volumes/news`           | Dernières sorties        |
+| `GET /v2/publishers`             | Liste des éditeurs       |
+| `GET /v2/users/me/collection`    | Collection utilisateur   |
+
+##### Page Collection
+
+**Section Pile à lire / Collection / Compléter / Envies :**
+
+| Endpoint                      | Description              |
+|-------------------------------|--------------------------|
+| `GET /v2/users/me/collection` | Collection utilisateur   |
+| `GET /v2/publishers`          | Liste des éditeurs       |
+| `GET /v2/user/{username}`     | Profil utilisateur       |
+
+**Section Prêts (Loans) :**
+
+| Endpoint                         | Description              |
+|----------------------------------|--------------------------|
+| `GET /v2/users/me/collection`    | Collection utilisateur   |
+
+**Section Statistiques (tous onglets) :**
+
+| Endpoint                      | Description              |
+|-------------------------------|--------------------------|
+| `GET /v2/publishers`          | Liste des éditeurs       |
+| `GET /v2/user/{username}`     | Profil utilisateur       |
+| `GET /v2/users/me/collection` | Collection utilisateur   |
+
+##### Page Planning
+
+**Section Personnalisé :**
+
+| Endpoint                                    | Description                 |
+|---------------------------------------------|-----------------------------|
+| `GET /v2/users/me/collection`               | Collection utilisateur      |
+| `GET /v2/publishers`                        | Liste des éditeurs          |
+| `GET /v2/users/me/ad_native_planning_perso` | Planning personnalisé natif |
+
+**Section Tout / Nouveautés / Coffrets :**
+
+| Endpoint                         | Description                              |
+|----------------------------------|------------------------------------------|
+| `GET /v2/planning?month=YYYY-MM` | Planning du mois (paramètre obligatoire) |
+| `GET /v2/users/me/collection`    | Collection utilisateur                   |
+| `GET /v2/publishers`             | Liste des éditeurs (section Tout)        |
+
+##### Page Recherche
+
+**Section Titres :**
+
+| Endpoint                         | Description              |
+|----------------------------------|--------------------------|
+| `GET /v2/series`                 | Recherche de séries      |
+| `GET /v2/kinds`                  | Genres disponibles       |
+| `GET /v2/users/me/collection`    | Collection utilisateur   |
+
+**Section Auteurs :**
+
+| Endpoint                         | Description              |
+|----------------------------------|--------------------------|
+| `GET /v2/authors`                | Recherche d'auteurs      |
+| `GET /v2/users/me/collection`    | Collection utilisateur   |
+
+**Section Éditeurs :**
+
+| Endpoint                         | Description              |
+|----------------------------------|--------------------------|
+| `GET /v2/publishers`             | Recherche d'éditeurs     |
+| `GET /v2/users/me/collection`    | Collection utilisateur   |
+
+##### Page Panier
+
+| Endpoint                         | Description              |
+|----------------------------------|--------------------------|
+| `GET /v1/users/me/cart`          | Panier utilisateur       |
+| `GET /v2/users/me/collection`    | Collection utilisateur   |
+
+##### Page Volume (détail)
+
+| Endpoint                         | Description              |
+|----------------------------------|--------------------------|
+| `GET /v2/volumes/{id_volume}`    | Détail du volume         |
+| `GET /v2/editions/{id_edition}`  | Édition associée         |
+| `GET /v1/bdfugue_offer/{isbn}`   | Offre BDfugue            |
+| `GET /v1/amazon_offer/{asin}`    | Offre Amazon             |
+| `GET /v1/img_offer/{isbn}`       | Offre IMG                |
+| `GET /v2/users/me/collection`    | Collection utilisateur   |
+
+##### Page Série (détail)
+
+| Endpoint                         | Description              |
+|----------------------------------|--------------------------|
+| `GET /v2/series/{id_serie}`      | Détail de la série       |
+| `GET /v2/kinds`                  | Genres de la série       |
+| `GET /v2/users/me/collection`    | Collection utilisateur   |
+
+##### Page Édition (détail)
+
+| Endpoint                         | Description              |
+|----------------------------------|--------------------------|
+| `GET /v2/editions/{id_edition}`  | Détail de l'édition      |
+| `GET /v2/users/me/collection`    | Collection utilisateur   |
+
+##### Page Auteur (détail)
+
+| Endpoint                         | Description              |
+|----------------------------------|--------------------------|
+| `GET /v2/authors/{id_author}`    | Détail de l'auteur       |
+| `GET /v2/users/me/collection`    | Collection utilisateur   |
+
+##### Page Éditeur (détail)
+
+| Endpoint                            | Description            |
 |-------------------------------------|------------------------|
-| `GET /volumes`                      | Catalogue des tomes    |
-| `GET /series`                       | Liste des séries       |
-| `GET /editions`                     | Éditions par éditeur   |
-| `GET /releases`                     | Planning des sorties   |
-| `GET /users/me/possessions`         | Collection utilisateur |
-| `POST /users/me/possessions`        | Ajouter un tome        |
-| `DELETE /users/me/possessions/{id}` | Retirer un tome        |
-| `GET /search`                       | Recherche globale      |
+| `GET /v2/publishers/{id_publisher}` | Détail de l'éditeur    |
+| `GET /v2/users/me/collection`       | Collection utilisateur |
+
+##### Page Paramètres (Settings)
+
+| Endpoint                      | Description              |
+|-------------------------------|--------------------------|
+| `GET /v2/user/{username}`     | Profil utilisateur       |
+| `GET /v2/users/me/collection` | Collection utilisateur   |
 
 ### APIs locales (Serveur/NAS)
 
@@ -117,12 +241,12 @@ Ce fichier centralise les informations partagées entre
 
 > **Règle obligatoire** : Chaque service doit respecter la structure de dossiers suivante.
 
-| Service        | Dossier                    | Description                              |
-|----------------|----------------------------|------------------------------------------|
-| Auth API       | `booksync_api_auth/`       | Service d'authentification (port 8000)   |
-| Data API       | `booksync_api_data/`       | Service de données (port 8001)           |
+| Service        | Dossier                    | Description                               |
+|----------------|----------------------------|-------------------------------------------|
+| Auth API       | `booksync_api_auth/`       | Service d'authentification (port 8000)    |
+| Data API       | `booksync_api_data/`       | Service de données (port 8001)            |
 | Prediction API | `booksync_api_prediction/` | Service de recommandations V3 (port 8002) |
-| App Frontend   | `booksync_app_qt/`         | Application PySide6/QML                  |
+| App Frontend   | `booksync_app_qt/`         | Application PySide6/QML                   |
 
 ---
 

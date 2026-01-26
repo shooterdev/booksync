@@ -218,3 +218,454 @@ SHALL/MUST pour la validation OpenSpec.
   "email_mangacollec": "shooter.dev@gmail.com",
   "password_mangacollec": "Shooteroot59"
 }
+
+---
+
+Ajoute dans les fichiers adéquats ces informations suivantes chaque page fait une requête à l'API avec ses URL. 
+Si authentifié.
+page news
+    - https://api.mangacollec.com/v2/volumes/news
+    - https://api.mangacollec.com/v2/publishers
+    - https://api.mangacollec.com/v2/users/me/collection
+    - https://api.mangacollec.com/v1/users/me/recommendation
+    - https://api.mangacollec.com/v1/users/me
+    - https://api.mangacollec.com/v1/users/me/cart
+    - 
+    - 
+    - 
+
+page collection
+    section pile a lire
+        - https://api.mangacollec.com/v2/users/me/collection
+        - https://api.mangacollec.com/v2/publishers
+        - https://api.mangacollec.com/v1/user/{username}
+        - https://api.mangacollec.com/v1/users/me/recommendation
+        - https://api.mangacollec.com/v1/users/me
+        - https://api.mangacollec.com/v1/users/me/cart
+    section collection
+        - https://api.mangacollec.com/v2/users/me/collection
+        - https://api.mangacollec.com/v2/publishers
+        - https://api.mangacollec.com/v1/user/{username}
+        - https://api.mangacollec.com/v1/users/me/recommendation
+        - https://api.mangacollec.com/v1/users/me
+        - https://api.mangacollec.com/v1/users/me/cart
+    section completed
+        - https://api.mangacollec.com/v2/users/me/collection
+        - https://api.mangacollec.com/v2/publishers
+        - https://api.mangacollec.com/v1/user/{username}
+        - https://api.mangacollec.com/v1/users/me/recommendation
+        - https://api.mangacollec.com/v1/users/me
+        - https://api.mangacollec.com/v1/users/me/cart
+    section envies
+        - https://api.mangacollec.com/v2/users/me/collection
+        - https://api.mangacollec.com/v2/publishers
+        - https://api.mangacollec.com/v1/user/{username}
+        - https://api.mangacollec.com/v1/users/me/recommendation
+        - https://api.mangacollec.com/v1/users/me
+        - https://api.mangacollec.com/v1/users/me/cart
+    section loan
+        - https://api.mangacollec.com/v2/users/me/collection
+        - https://api.mangacollec.com/v1/users/me/recommendation
+        - https://api.mangacollec.com/v1/users/me
+        - https://api.mangacollec.com/v1/users/me/cart
+    section statistics
+        section statistics publisher
+        section statistics kinds
+        section statistics colection history
+        section statistics reading history
+            - https://api.mangacollec.com/v2/publishers
+            - https://api.mangacollec.com/v1/user/{username}
+            - https://api.mangacollec.com/v2/users/me/collection
+            - https://api.mangacollec.com/v1/users/me/recommendation
+            - https://api.mangacollec.com/v1/users/me
+            - https://api.mangacollec.com/v1/users/me/cart
+
+page planning
+    section personalise
+        - https://api.mangacollec.com/v2/users/me/collection
+        - https://api.mangacollec.com/v2/publishers
+        - https://api.mangacollec.com/v1/users/me/recommendation
+        - https://api.mangacollec.com/v2/users/me/ad_native_planning_perso
+        - https://api.mangacollec.com/v1/users/me
+        - https://api.mangacollec.com/v1/users/me/cart
+    section tout
+        - https://api.mangacollec.com/v2/planning?month=2026-01
+        - https://api.mangacollec.com/v2/users/me/collection
+        - https://api.mangacollec.com/v2/publishers
+        - https://api.mangacollec.com/v1/users/me/recommendation
+        - https://api.mangacollec.com/v1/users/me
+        - https://api.mangacollec.com/v1/users/me/cart
+    section news
+        - https://api.mangacollec.com/v2/planning?month=2026-01
+        - https://api.mangacollec.com/v2/users/me/collection
+        - https://api.mangacollec.com/v1/users/me/recommendation
+        - https://api.mangacollec.com/v1/users/me
+        - https://api.mangacollec.com/v1/users/me/cart
+    section coffrets
+        - https://api.mangacollec.com/v2/planning?month=2026-01
+        - https://api.mangacollec.com/v2/users/me/collection
+        - https://api.mangacollec.com/v1/users/me/recommendation
+        - https://api.mangacollec.com/v1/users/me
+        - https://api.mangacollec.com/v1/users/me/cart
+
+page recherche
+    section title
+        - https://api.mangacollec.com/v2/series
+        - https://api.mangacollec.com/v2/kinds
+        - https://api.mangacollec.com/v2/users/me/collection
+        - https://api.mangacollec.com/v1/users/me/recommendation
+        - https://api.mangacollec.com/v1/users/me
+        - https://api.mangacollec.com/v1/users/me/cart
+    section author
+        - https://api.mangacollec.com/v2/authors
+        - https://api.mangacollec.com/v2/users/me/collection
+        - https://api.mangacollec.com/v1/users/me/recommendation
+        - https://api.mangacollec.com/v1/users/me
+        - https://api.mangacollec.com/v1/users/me/cart
+    section publisher
+        - https://api.mangacollec.com/v2/publishers
+        - https://api.mangacollec.com/v2/users/me/collection
+        - https://api.mangacollec.com/v1/users/me/recommendation
+        - https://api.mangacollec.com/v1/users/me
+        - https://api.mangacollec.com/v1/users/me/cart
+
+page panier
+    - https://api.mangacollec.com/v1/users/me/cart
+    - https://api.mangacollec.com/v2/users/me/collection
+    - https://api.mangacollec.com/v1/users/me/recommendation
+    - https://api.mangacollec.com/v1/users/me
+
+page volume
+    - https://api.mangacollec.com/v2/volumes/{id_volume}
+    - https://api.mangacollec.com/v1/bdfugue_offer/{isbn}
+    - https://api.mangacollec.com/v1/amazon_offer/{asin}
+    - https://api.mangacollec.com/v2/editions/{id_edition}
+    - https://api.mangacollec.com/v1/img_offer/{isbn}
+    - https://api.mangacollec.com/v2/users/me/collection
+    - https://api.mangacollec.com/v1/users/me
+    - https://api.mangacollec.com/v1/users/me/recommendation
+    - https://api.mangacollec.com/v1/users/me/cart
+page serie
+    - https://api.mangacollec.com/v2/series/{id_serie}
+    - https://api.mangacollec.com/v2/users/me/collection
+    - https://api.mangacollec.com/v1/users/me
+    - https://api.mangacollec.com/v1/users/me/recommendation
+    - https://api.mangacollec.com/v1/users/me/cart
+page edition
+    - https://api.mangacollec.com/v2/editions/{id_edition}
+    - https://api.mangacollec.com/v2/users/me/collection
+    - https://api.mangacollec.com/v1/users/me
+    - https://api.mangacollec.com/v1/users/me/recommendation
+    - https://api.mangacollec.com/v1/users/me/cart
+page author
+    - https://api.mangacollec.com/v2/authors/{id_author}
+    - https://api.mangacollec.com/v2/users/me/collection
+    - https://api.mangacollec.com/v1/users/me
+    - https://api.mangacollec.com/v1/users/me/recommendation
+    - https://api.mangacollec.com/v1/users/me/cart
+page publisher
+    - https://api.mangacollec.com/v2/publishers/{id_publisher}
+    - https://api.mangacollec.com/v2/users/me/collection
+    - https://api.mangacollec.com/v1/users/me
+    - https://api.mangacollec.com/v1/users/me/recommendation
+    - https://api.mangacollec.com/v1/users/me/cart
+page settings
+    - https://api.mangacollec.com/v1/user/{username}
+    - https://api.mangacollec.com/v2/users/me/collection
+    - https://api.mangacollec.com/v1/users/me/recommendation
+    - https://api.mangacollec.com/v1/users/me
+    - https://api.mangacollec.com/v1/users/me/cart
+
+---
+
+
+Rajoute ces endpoints
+
+## POST /v1/possessions_multiple
+param
+```json
+[
+    {
+        "volume_id":"fdb3365e-b18d-45b3-9ab0-09b3b73b9367"
+    }
+]
+```
+responce
+```json
+{
+    "possessions": [
+        {
+            "id": "f32038b6-e9b9-4427-ae6d-94b15df1a022",
+            "user_id": "1f32e2fc-c7c3-4dd3-9f18-e0fcdb075295",
+            "volume_id": "fdb3365e-b18d-45b3-9ab0-09b3b73b9367",
+            "created_at": "2025-10-26T19:46:02.397Z"
+        }
+    ],
+    "follow_editions": [
+        {
+            "id": "c43fb28c-944c-48cd-806a-6ac2f7fe241e",
+            "user_id": "1f32e2fc-c7c3-4dd3-9f18-e0fcdb075295",
+            "edition_id": "bd982e24-525d-47cc-a152-7582e5f8236d",
+            "following": true,
+            "created_at": "2025-10-26T19:46:02.385Z"
+        }
+    ]
+}
+```
+
+## DELETE /v1/possessions_multiple
+param
+```json
+[
+    {
+        "id":"c3c66009-f8c5-4d4e-abcc-a34591f29166"
+    }
+]
+```
+responce
+```json
+{
+    "possessions": [
+        {
+            "id": "c3c66009-f8c5-4d4e-abcc-a34591f29166",
+            "deleted": true
+        }
+    ],
+    "follow_editions": [
+        {
+            "id": "9e0b1776-546e-4d1f-8856-e22ba47dec68",
+            "deleted": true
+        }
+    ],
+    "loans": []
+}
+```
+
+## POST /v1/follow_editions/
+param
+```json
+{
+    "edition_id": "bd982e24-525d-47cc-a152-7582e5f8236d",
+    "following": true
+}
+```
+réponse
+```json
+{
+    "id": "bc325464-e110-49fa-b346-726d116f8975",
+    "user_id": "1f32e2fc-c7c3-4dd3-9f18-e0fcdb075295",
+    "edition_id": "bd982e24-525d-47cc-a152-7582e5f8236d",
+    "following": true,
+    "created_at": "2025-10-26T20:45:42.486Z",
+    "updated_at": "2025-10-26T20:45:42.486Z"
+}
+```
+
+## DELETE /v1/follow_editions/{id_follow_edition}
+param
+```json
+
+```
+réponse
+```json
+
+```
+
+## POST v1/reads_multiple
+param
+```json
+[
+    {
+        "volume_id":"dcf1f103-48d0-4a0a-b20a-acc20f656f04"
+    }
+]
+```
+responce
+```json
+{
+    "reads": [
+        {
+            "id": "0994509d-1227-411d-ac18-73708b3f6371",
+            "user_id": "1f32e2fc-c7c3-4dd3-9f18-e0fcdb075295",
+            "volume_id": "dcf1f103-48d0-4a0a-b20a-acc20f656f04",
+            "created_at": "2025-10-26T19:57:46.199Z"
+        }
+    ],
+    "read_editions": [
+        {
+            "id": "3a15a949-28f8-4ab9-bdc2-94df79b84d6d",
+            "user_id": "1f32e2fc-c7c3-4dd3-9f18-e0fcdb075295",
+            "edition_id": "1e68b837-be95-4baa-a38f-09c082777c04",
+            "reading": true,
+            "created_at": "2025-10-26T19:57:46.192Z"
+        }
+    ]
+}
+```
+
+## DELETE /v1/reads_multiple
+param
+```json
+[
+    {
+        "id":"0994509d-1227-411d-ac18-73708b3f6371"
+    }
+]
+```
+responce
+```json
+{
+    "reads": [
+        {
+            "id": "0994509d-1227-411d-ac18-73708b3f6371",
+            "deleted": true
+        }
+    ],
+    "read_editions": [
+        {
+            "id": "3a15a949-28f8-4ab9-bdc2-94df79b84d6d",
+            "deleted": true
+        }
+    ]
+}
+```
+
+
+
+
+## POST https://api.mangacollec.com/v1/loans_multiple
+
+param 
+```json
+{
+    "loans":[
+        {
+            "borrower_id":"7a2d73ed-e99a-42fd-8e06-ee3a0c158569",
+            "possession_id":"1619df2a-9993-4947-877d-9c914c903333"
+        }
+    ]
+}
+```
+responce
+```json
+{
+    "loans": [
+        {
+            "id": "b88a90cb-1a78-4fc9-b510-bfa7f18621f0",
+            "borrower_id": "7a2d73ed-e99a-42fd-8e06-ee3a0c158569",
+            "possession_id": "1619df2a-9993-4947-877d-9c914c903333",
+            "created_at": "2026-01-26T21:05:08.503Z"
+        }
+    ]
+}
+```
+
+## DELETE https://api.mangacollec.com/v1/loans_multiple
+
+param 
+```json
+{
+    "loans":[
+        {
+            "id":"c639891b-be9d-485f-9354-95057fe4d196"
+        }
+    ]
+}
+```
+responce
+```json
+{
+    "loans":[
+        {
+            "id":"c639891b-be9d-485f-9354-95057fe4d196"
+        }
+    ]
+}
+```
+responce error
+```json
+{
+    "loans": [
+        {
+            "id": "b88a90cb-1a78-4fc9-b510-bfa7f18621f0",
+            "errors": [
+                "This loans doesn't exist"
+            ]
+        }
+    ]
+}
+```
+
+## POST https://api.mangacollec.com/v2/borrowers
+
+param 
+```json
+{
+    "category":"person", // person/stockage
+    "title":"bb"
+}
+```
+responce
+```json
+{
+    "id": "f4b030fe-735e-4ead-a449-c1290aa6d180",
+    "user_id": "1f32e2fc-c7c3-4dd3-9f18-e0fcdb075295",
+    "title": "bb",
+    "category": "person",
+    "created_at": "2026-01-26T21:12:24.566Z",
+    "updated_at": "2026-01-26T21:12:24.566Z"
+}
+```
+responce error
+```json
+{
+    "errors": [
+        "La validation a échoué : Category perddddson is not a valid category"
+    ]
+}
+```
+## DELETE https://api.mangacollec.com/v2/borrowers/{id_borrower}
+
+param 
+```json
+
+```
+responce `204`
+responce error `404`
+```json
+{
+    "errors": [
+        "Couldn't find this record"
+    ]
+}
+```
+
+## POST https://api.mangacollec.com/v1/users/me/cart
+
+param 
+```json
+[
+  {
+    "volume_id":"5732a254-c687-4868-b095-2e94e1144ae2"
+  }
+]
+
+```
+responce contenu du cart (panier)
+
+## DELETE https://api.mangacollec.com/v1/users/me/cart/volume/{id_volume}
+
+
+param 
+```json
+
+```
+responce `200`
+responce error `404`
+```json
+{
+    "errors": [
+        "Couldn't find this record"
+    ]
+}
+```
