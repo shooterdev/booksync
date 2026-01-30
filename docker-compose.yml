@@ -59,6 +59,50 @@ services:
       - booksync-network
     command: uvicorn booksync_api_auth.main:app --host 0.0.0.0 --port 8000 --reload
 
+  data-api:
+    build:
+      context: ./booksync_api_data
+      dockerfile: Dockerfile
+    container_name: booksync_data_api
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${DB_DATA_API_USER}:${DB_DATA_API_PASSWORD}@bdd:5432/${DB_ADMIN_DB}
+      ENVIRONMENT: development
+      DEBUG: "true"
+    depends_on:
+      bdd:
+        condition: service_healthy
+    volumes:
+      - ./booksync_api_data/src:/app/src
+    networks:
+      - booksync-network
+    command: uvicorn booksync_api_data.main:app --host 0.0.0.0 --port 8001 --reload
+
+  prediction-api:
+    build:
+      context: ./booksync_api_prediction
+      dockerfile: Dockerfile
+    container_name: booksync_prediction_api
+    restart: unless-stopped
+    profiles:
+      - v3
+    ports:
+      - "8002:8002"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${DB_PREDICTION_API_USER}:${DB_PREDICTION_API_PASSWORD}@bdd:5432/${DB_ADMIN_DB}
+      ENVIRONMENT: development
+      DEBUG: "true"
+    depends_on:
+      bdd:
+        condition: service_healthy
+    volumes:
+      - ./booksync_api_prediction/src:/app/src
+    networks:
+      - booksync-network
+    command: uvicorn booksync_api_prediction.main:app --host 0.0.0.0 --port 8002 --reload
+
 networks:
   booksync-network:
     driver: bridge
