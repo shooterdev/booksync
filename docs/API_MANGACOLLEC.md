@@ -28,13 +28,13 @@ Documentation de l'API externe Mangacollec utilisée par BookSync.
 
 ## 2. Authentification
 
-| Méthode          | OAuth2 (Client Credentials)                     |
+| Méthode          | OAuth2 (grant_type: password)                   |
 |------------------|-------------------------------------------------|
 | Client ID        | Voir variables d'environnement                  |
 | Client Secret    | Voir variables d'environnement                  |
 | Header           | `Authorization: Bearer {access_token}`          |
-| Token Endpoint   | <!-- TODO: À compléter -->                      |
-| Refresh          | Géré par Auth API locale                        |
+| Token Endpoint   | `https://api.mangacollec.com/auth/token`        |
+| Refresh          | Géré par l'App Qt (stockage keyring, auto toutes les 1H) |
 
 ---
 
@@ -54,6 +54,10 @@ Documentation de l'API externe Mangacollec utilisée par BookSync.
 | Planning     | [planning.md](api/mangacollec/planning.md)      | Sorties à venir                      |
 | Offres       | [offers.md](api/mangacollec/offers.md)          | Offres marchands (BDfugue, Amazon)   |
 | Genres       | [kinds.md](api/mangacollec/kinds.md)            | Genres/catégories                    |
+| Possessions    | [possessions.md](api/mangacollec/possessions.md)              | Ajout/suppression possessions  |
+| Lectures       | [reads.md](api/mangacollec/reads.md)                          | Suivi de lecture               |
+| Prêts          | [loans.md](api/mangacollec/loans.md)                          | Prêts et emprunteurs           |
+| Recommandations| [recommendations.md](api/mangacollec/recommendations.md)      | Recommandations personnalisées |
 
 ---
 
@@ -83,11 +87,13 @@ utilisés par chaque page de l'application.
 
 ### Format d'erreur
 
-<!-- TODO: À compléter avec le format réel -->
+Format standard retourné par l'API pour les erreurs 4xx :
 
 ```json
 {
-
+    "errors": [
+        "Message d'erreur"
+    ]
 }
 ```
 
@@ -97,4 +103,4 @@ utilisés par chaque page de l'application.
 
 ### Cache
 
-Voir [COMMON.md § Cache local SQLite](COMMON.md#53-cache-local-sqlite) pour les durées de validité par type de données.
+Voir [COMMON.md § Stack technique](COMMON.md#3-stack-technique) pour les détails du cache local TinyDB.

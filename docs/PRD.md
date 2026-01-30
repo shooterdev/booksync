@@ -11,7 +11,7 @@ inspirée de [mangacollec.com](https://www.mangacollec.com).
 
 1. [Vision et objectif](#1-vision-et-objectif)
 2. [Fonctionnalités](#2-fonctionnalités)
-3. [Modèle de données](#3-modèle-de-données)
+3. [Modèle de données](#3-modèle-de-données) (§3.7 Store local, §3.8 Schéma relationnel)
 4. [Structure des écrans QML](#4-structure-des-écrans-qml)
 5. [Priorisation MVP / V1 / V2](#5-priorisation-mvp--v1--v2)
 6. [Architecture Python / PySide6](#6-architecture-python--pyside6)
@@ -34,7 +34,7 @@ Collectionneurs de mangas francophones, usage Raspberry Pi (équipement embarqu�
 
 > Voir [COMMON.md § Architecture déployée](./COMMON.md#1-architecture-déployée) pour le schéma complet.
 
-L'application fonctionne en architecture distribuée : Raspberry Pi (frontend) + Serveur/NAS (APIs locales) + API Mangacollec (catalogue).
+L'application fonctionne en architecture distribuée : Raspberry Pi (frontend) + API Mangacollec (catalogue) + Serveur/NAS (APIs locales).
 
 ### Sources de données
 
@@ -59,16 +59,16 @@ L'application fonctionne en architecture distribuée : Raspberry Pi (frontend) +
 
 #### Collection (8 sous-sections)
 
-| #   | Fonctionnalité            | Description                                                                      |
-|-----|---------------------------|----------------------------------------------------------------------------------|
-| 2.1 | **Pile à lire**           | Progression de lecture par série (lus/possédés), stats globales, pause/terminer  |
-| 2.2 | **Collection**            | Vue de tous les tomes possédés, progression par série, tri (date/alphabétique)   |
-| 2.3 | **Compléter**             | Détection automatique des tomes manquants dans les séries incomplètes            |
-| 2.4 | **Envies**                | Liste de souhaits pour planifier les achats futurs                               |
-| 2.5 | **Prêts**                 | Suivi des volumes prêtés (à qui, où) avec formulaire de création                 |
-| 2.6 | **Statistiques**          | Dashboard : répartition par éditeur/genre (graphiques), derniers ajouts/lectures |
-| 2.7 | **Historique Collection** | Journal chronologique des ajouts (par année/mois)                                |
-| 2.8 | **Historique Lecture**    | Journal des lectures effectuées (par semaine/mois/année)                         |
+| #   | Fonctionnalité            | Description                                                                          |
+|-----|---------------------------|--------------------------------------------------------------------------------------|
+| 2.1 | **Pile à lire**           | Progression de lecture par série (lus/possédés), stats globales, pause/terminer      |
+| 2.2 | **Collection**            | Vue de tous les tomes possédés, progression par série, tri (date_ajout/alphabétique) |
+| 2.3 | **Compléter**             | Détection automatique des tomes manquants dans les séries incomplètes                |
+| 2.4 | **Envies**                | Liste de souhaits pour planifier les achats futurs                                   |
+| 2.5 | **Prêts**                 | Suivi des volumes prêtés (à qui, où) avec formulaire de création                     |
+| 2.6 | **Statistiques**          | Dashboard : répartition par éditeur/genre (graphiques), derniers ajouts/lectures     |
+| 2.7 | **Historique Collection** | Journal chronologique des ajouts (par année/mois)                                    |
+| 2.8 | **Historique Lecture**    | Journal des lectures effectuées (par semaine/mois/année)                             |
 
 #### Planning (4 onglets)
 
@@ -83,12 +83,12 @@ L'application fonctionne en architecture distribuée : Raspberry Pi (frontend) +
 
 | #  | Fonctionnalité        | Description                                                                           |
 |----|-----------------------|---------------------------------------------------------------------------------------|
-| 4  | **Recherche globale** | Recherche par Titres, Auteurs, Éditeurs                                               |
+| 4  | **Recherche globale** | Recherche par Titres, Auteurs, Éditeurs, volumes par isbn (sur données api)           |
 | 7  | **Fiche Volume**      | Couverture, navigation inter-tomes, actions, stats communautaires, prix, résumé, ISBN |
 | 8  | **Fiche Série**       | Type, genres, auteurs avec rôles, liste des éditions                                  |
 | 9  | **Fiche Édition**     | Lien série/éditeur, stats (parus/à paraître), statut, grille des tomes                |
 | 10 | **Fiche Auteur**      | Nom, grille de toutes ses œuvres avec rôle                                            |
-| 11 | **Fiche Éditeur**     | Dernières/prochaines sorties, catalogue complet alphabétique                          |
+| 11 | **Fiche Publisher**   | Dernières/prochaines sorties, catalogue (Series) complet alphabétique                 |
 
 #### Autres
 
@@ -96,9 +96,54 @@ L'application fonctionne en architecture distribuée : Raspberry Pi (frontend) +
 |----|-------------------------|-------------------------------------------------------------------------|
 | 5  | **Panier**              | Volumes à acheter, calcul du budget, précommandes, redirection marchand |
 | 6  | **Paramètres**          | Profil, préférences (thème, images adultes), multi-utilisateur          |
-| 23 | **Scanner code-barres** | Support douchette Bluetooth (ISBN) pour ajout rapide                    |
+| 23 | **Scanner code-barres** | Douchette Bluetooth (ISBN) + webcam (OpenCV/pyzbar) pour ajout rapide   |
 | 24 | **Multi-utilisateur**   | Profils séparés pour usage familial                                     |
 | 25 | **Thème clair/sombre**  | Basculement avec charte graphique cohérente                             |
+
+### 2.2 Composants UI détaillés par onglet
+
+Description des widgets et composants principaux utilisés dans chaque section de l'application.
+
+#### Pile à Lire
+
+| Composant                | Description                                                                                           |
+|--------------------------|-------------------------------------------------------------------------------------------------------|
+| `StatusRead`             | Barre de statut affichant le nombre de volumes lus / possédés et la progression globale               |
+| `SerieReadListView`      | Liste des séries en cours de lecture avec progression individuelle                                    |
+| `SerieReadCard`          | Ligne d'une série avec couverture, titre, barre de progression (lus/possédés), actions pause/terminer |
+
+#### Collection
+
+| Composant                        | Description                                                                             |
+|----------------------------------|-----------------------------------------------------------------------------------------|
+| `StatusCollection`               | Barre de statut avec compteurs (volumes possédés, éditions possédées)                   |
+| `EditionListView`                | Liste des éditions possédées avec couverture des volumes possédées                      |
+| `ItemEditionCollection`          | Carte d'une édition avec couverture, titre série, éditeur, progression (possédés/parus) |
+
+#### Compléter
+
+| Composant                   | Description                                                         |
+|-----------------------------|---------------------------------------------------------------------|
+| `StatusCollection`          | Réutilisé — compteurs avec focus sur les tomes manquants            |
+| `EditionListView`           | Grille des éditions incomplètes avec indication des tomes manquants |
+
+#### Envies
+
+| Composant                   | Description                                                         |
+|-----------------------------|---------------------------------------------------------------------|
+| `StatusCollection`          | Réutilisé — compteurs des éditions suivies non possédées            |
+| `EditionListView`           | Grille des éditions de la wishlist avec tomes disponibles à l'achat |
+
+#### Prêts
+
+| Composant              | Description                                                  |
+|------------------------|--------------------------------------------------------------|
+| `BorrowerListView`     | Liste des emprunteurs avec nombre de volumes prêtés          |
+| `BorrowerRow`          | Ligne emprunteur avec nom, catégorie, nombre de prêts actifs |
+| `LoanVolumeRow`        | Ligne d'un volume prêté avec couverture, titre, date de prêt |
+| `CreateBorrowerButton` | Bouton d'ajout d'un nouvel emprunteur                        |
+| `CreateLoanButton`     | Bouton de création d'un nouveau prêt                         |
+| `ReturnLoanButton`     | Bouton de retour d'un volume prêté                           |
 
 ---
 
@@ -208,7 +253,8 @@ L'application fonctionne en architecture distribuée : Raspberry Pi (frontend) +
 
 #### VolumeExtra (`volume_extra`)
 
-> **Note** : Cette table est stockée sur le serveur (PostgreSQL) et accessible via la **Data API locale** (port 8001). Ces données sont absentes de l'API Mangacollec et alimentées par scraping (ex: BubbleBD).
+> **Note** : Cette table est stockée sur le serveur (PostgreSQL) et accessible via la **Data API locale** (port 8001).
+> Ces données sont absentes de l'API Mangacollec et alimentées par scraping (BubbleBD).
 
 | Champ        | Type       | Description           |
 |--------------|------------|-----------------------|
@@ -218,7 +264,7 @@ L'application fonctionne en architecture distribuée : Raspberry Pi (frontend) +
 | `length`     | String(20) | Longueur (cm)         |
 | `height`     | String(20) | Hauteur (cm)          |
 | `width`      | String(20) | Largeur (cm)          |
-| `weight`     | String(20) | Poids (kg)            |
+| `weight`     | String(20) | Poids (g)             |
 | `extra_info` | Text       | Infos supplémentaires |
 
 ### 3.2 Tables Coffrets
@@ -267,12 +313,9 @@ L'application fonctionne en architecture distribuée : Raspberry Pi (frontend) +
 | `id`                   | uuid_v4     | Clé primaire                       |
 | `id_mangacollec`       | uuid_v4     | UUID de mangacollec                |
 | `username`             | String(100) | Nom d'utilisateur (unique, indexé) |
-| `certify_adult`        | Boolean     | Certify adult                      |
 | `email`                | String(255) | Email (unique, indexé)             |
 | `password`             | String(255) | Password                           |
 | `password_mangacollec` | String(255) | Password mangacollec               |
-| `token`                | String(255) | token mangacollec                  |
-| `refresh_token`        | String(255) | refresh_token mangacollec          |
 
 ### 3.4 Collections Utilisateurs
 
@@ -363,7 +406,7 @@ L'application fonctionne en architecture distribuée : Raspberry Pi (frontend) +
 
 | Champ                     | Type        | Description                 |
 |---------------------------|-------------|-----------------------------|
-| `id`                      | uuid_v4     | PK (vient de l'API)         |
+| `id`                      | uuid_v4     | Clé primaire                |
 | `user_id`                 | uuid_v4     | FK → users                  |
 | `store`                   | String(50)  | "bdfugue", "amazon", etc.   |
 | `store_cart_id`           | String(100) | ID côté boutique (nullable) |
@@ -376,7 +419,7 @@ L'application fonctionne en architecture distribuée : Raspberry Pi (frontend) +
 
 | Champ                          | Type        | Description                 |
 |--------------------------------|-------------|-----------------------------|
-| `id`                           | uuid_v4     | PK (vient de l'API)         |
+| `id`                           | uuid_v4     | Clé primaire                |
 | `cart_id`                      | uuid_v4     | FK → carts                  |
 | `volume_id`                    | uuid_v4     | FK → volumes                |
 | `quantity`                     | Integer     | Quantité                    |
@@ -390,7 +433,7 @@ L'application fonctionne en architecture distribuée : Raspberry Pi (frontend) +
 
 | Champ                          | Type        | Description                 |
 |--------------------------------|-------------|-----------------------------|
-| `id`                           | uuid_v4     | PK (vient de l'API)         |
+| `id`                           | uuid_v4     | Clé primaire                |
 | `cart_id`                      | uuid_v4     | FK → carts                  |
 | `box_id`                       | uuid_v4     | FK → boxes                  |
 | `quantity`                     | Integer     | Quantité                    |
@@ -400,7 +443,49 @@ L'application fonctionne en architecture distribuée : Raspberry Pi (frontend) +
 | `store_cart_item_link`         | Text        | Lien produit boutique       |
 | `store_cart_item_availability` | String(100) | Disponibilité               |
 
-### 3.7 Schéma relationnel
+### 3.7 Structure du store local
+
+Le cache local (`booksync-store.json`) reproduit les données de l'API Mangacollec dans un format normalisé 
+pour un accès rapide et un fonctionnement hors-ligne en lecture seule. 
+Le fichier de référence se trouve dans `docs/booksync_store.json`.
+
+> Voir [ARCHITECTURE.md § Structure du store local](./ARCHITECTURE.md#structure-du-store-local-booksync-storejson) 
+> pour la documentation technique complète (pattern normalisé, entités, structures spécifiques).
+
+**Correspondance modèle de données ↔ clés du store :**
+
+| Table (PRD §3.1-3.6)                     | Clé store           | Pattern    |
+|------------------------------------------|---------------------|------------|
+| Volume (`volumes`)                       | `volumes`           | normalisé  |
+| Edition (`editions`)                     | `editions`          | normalisé  |
+| Series (`series`)                        | `series`            | normalisé  |
+| Task (`tasks`)                           | `tasks`             | normalisé  |
+| Author (`authors`)                       | `authors`           | normalisé  |
+| Publisher (`publishers`)                 | `publishers`        | normalisé  |
+| Type (`types`)                           | `types`             | normalisé  |
+| Job (`jobs`)                             | `jobs`              | normalisé  |
+| Kind (`kinds`)                           | `kinds`             | normalisé  |
+| BoxEdition (`box_editions`)              | `boxEditions`       | normalisé  |
+| Box (`boxes`)                            | `boxes`             | normalisé  |
+| BoxVolume (`box_volumes`)                | `boxVolumes`        | normalisé  |
+| FollowEdition (`follow_editions`)        | `followEditions`    | normalisé  |
+| Possession (`possessions`)               | `possessions`       | normalisé  |
+| BoxFollowEdition (`box_follow_editions`) | `boxFollowEditions` | normalisé  |
+| BoxPossession (`box_possessions`)        | `boxPossessions`    | normalisé  |
+| ReadEdition (`read_editions`)            | `readEditions`      | normalisé  |
+| Read (`reads`)                           | `reads`             | normalisé  |
+| Borrower (`borrowers`)                   | `borrowers`         | normalisé  |
+| Loan (`loans`)                           | `loans`             | normalisé  |
+| User (`users`)                           | `user`              | objet plat |
+| Cart (`carts`)                           | `cart`              | objet plat |
+
+> **Note** : Les tables `SeriesKind`, `VolumeExtra`, `CartItem` et `CartBoxItem` n'ont pas de clé store dédiée.
+> `SeriesKind` est embarqué dans `kinds.series_ids` et `VolumeExtra` provient de la Data API locale,
+> et les items du panier sont inclus dans `cart.items` / `cart.box_items`.
+
+> Voir [ARCHITECTURE.md § Cache local TinyDB](./ARCHITECTURE.md#54-cache-local-tinydb) pour les clés store additionnelles (offres, polls, news, planning, etc.).
+
+### 3.8 Schéma relationnel
 
 ```
 ┌─────────────┐       ┌─────────────┐       ┌─────────────┐
@@ -409,7 +494,7 @@ L'application fonctionne en architecture distribuée : Raspberry Pi (frontend) +
                              │ 1:N
                              ▼
 ┌─────────────┐       ┌─────────────┐
-│  Publisher  │──1:N──│   Edition   │◄──────┐ (édition parallèle)
+│  Publisher  │──1:N──│   Edition   │◄──────┐ (édition parent)
 └─────────────┘       └──────┬──────┘───────┘
                              │ 1:N
                              ▼
@@ -437,129 +522,15 @@ L'application fonctionne en architecture distribuée : Raspberry Pi (frontend) +
 
 ### 4.1 Arborescence des fichiers
 
-```
-qml/
-├── main.qml
-├── Theme.qml
-├── Color.qml
-│
-├── components/
-│   ├── cards/
-│   │   ├── VolumeCard.qml
-│   │   ├── SeriesCard.qml
-│   │   ├── BoxCard.qml
-│   │   └── StatCard.qml
-│   ├── badges/
-│   │   ├── BadgeLastVolume.qml
-│   │   ├── BadgeOwned.qml
-│   │   ├── AuthorChip.qml
-│   │   └── GenreChip.qml
-│   ├── charts/
-│   │   ├── PieChart.qml
-│   │   └── BarChart.qml
-│   ├── inputs/
-│   │   ├── SearchBar.qml
-│   │   ├── FilterDropdown.qml
-│   │   └── DateNavigator.qml
-│   ├── ActionButton.qml
-│   ├── MenuButton.qml
-│   ├── ProgressBar.qml
-│   ├── ConfirmDialog.qml
-│   └── LoadingSpinner.qml
-│
-├── layouts/
-│   ├── MainLayout.qml
-│   ├── SideBar.qml
-│   ├── TopBar.qml
-│   └── SubNavBar.qml
-│
-├── pages/
-│   │
-│   ├── home/
-│   │   └── HomePage.qml
-│   │
-│   ├── news/
-│   │   └── NewsPage.qml
-│   │
-│   ├── collection/
-│   │   ├── CollectionContainer.qml
-│   │   ├── PileALirePage.qml
-│   │   ├── CollectionPage.qml
-│   │   ├── CompletePage.qml
-│   │   ├── EnviesPage.qml
-│   │   ├── LoansPage.qml
-│   │   ├── LoanFormDialog.qml
-│   │   ├── StatsPage.qml
-│   │   ├── HistoryCollectionPage.qml
-│   │   └── HistoryReadingPage.qml
-│   │
-│   ├── prediction/
-│   │   ├── PredictionPage.qml
-│   │   └── PredictionTab.qml
-│   │
-│   ├── planning/
-│   │   ├── PlanningContainer.qml
-│   │   ├── PlanningPersonalTab.qml
-│   │   ├── PlanningAllTab.qml
-│   │   ├── PlanningNewTab.qml
-│   │   └── PlanningBoxTab.qml
-│   │
-│   ├── search/
-│   │   ├── SearchPage.qml
-│   │   ├── SearchTitlesTab.qml
-│   │   ├── SearchAuthorsTab.qml
-│   │   └── SearchPublishersTab.qml
-│   │
-│   ├── cart/
-│   │   └── CartPage.qml
-│   │
-│   ├── settings/
-│   │   ├── SettingsPage.qml
-│   │   ├── ProfileSection.qml
-│   │   ├── PreferencesSection.qml
-│   │   └── UserSwitcher.qml
-│   │
-│   └── Catalogue/
-│       ├── VolumeDetailPage.qml
-│       ├── SeriesDetailPage.qml
-│       ├── EditionDetailPage.qml
-│       ├── AuthorDetailPage.qml
-│       └── PublisherDetailPage.qml
-│
-└── utils/
-    ├── Scanner.qml
-    └── Constants.qml
-```
+> Voir [COMMON.md § Structure des écrans QML](./COMMON.md#12-structure-des-écrans-qml) pour l'arborescence complète.
 
 ### 4.2 Navigation
 
-```
-SideBar (principale)          Sous-navigation (contextuelle)
-┌────────────────┐            ┌─────────────────────────────────────┐
-│ 1. Accueil     │            │                                     │
-│ 2. Collection ─┼──────────► │ Pile│Coll│Compl│Env│Prêts│Stats│Hist│
-│ 3. Prediction ─┼──────────► │ Prediction │ Prediction historique  │
-│ 4. Planning   ─┼──────────► │ Perso │ Tout │ Nouv │ Coffrets      │
-│ 5. Recherche  ─┼──────────► │ Titres │ Auteurs │ Éditeurs         │
-│ 6. Panier      │            │                                     │
-│ 7. Paramètres  │            │                                     │
-└────────────────┘            └─────────────────────────────────────┘
-```
+> Voir [COMMON.md § Navigation](./COMMON.md#13-navigation) pour le schéma complet.
 
 ### 4.3 Navigation entre fiches
 
-| Depuis              | Action               | Vers                |
-|---------------------|----------------------|---------------------|
-| Toute page          | Clic sur VolumeCard  | VolumeDetailPage    |
-| Toute page          | Clic sur SeriesCard  | SeriesDetailPage    |
-| VolumeDetailPage    | Clic sur "Série"     | SeriesDetailPage    |
-| VolumeDetailPage    | Clic sur "Édition"   | EditionDetailPage   |
-| SeriesDetailPage    | Clic sur une édition | EditionDetailPage   |
-| SeriesDetailPage    | Clic sur un auteur   | AuthorDetailPage    |
-| EditionDetailPage   | Clic sur un volume   | VolumeDetailPage    |
-| EditionDetailPage   | Clic sur éditeur     | PublisherDetailPage |
-| AuthorDetailPage    | Clic sur une œuvre   | SeriesDetailPage    |
-| PublisherDetailPage | Clic sur une édition | EditionDetailPage   |
+> Voir [COMMON.md § Navigation](./COMMON.md#13-navigation) pour la navigation inter-fiches.
 
 ---
 
@@ -579,7 +550,7 @@ SideBar (principale)          Sous-navigation (contextuelle)
 | 8   | Fiche Série                           | Voir les éditions                  |
 | 9   | Fiche Édition                         | Voir tous les tomes                |
 | —   | Synchronisation API                   | Infrastructure obligatoire         |
-| —   | Cache local (SQLite)                  | Performance + lecture hors-ligne   |
+| —   | Cache local (TinyDB)                  | Performance + lecture hors-ligne   |
 
 **Résultat** : L'utilisateur peut chercher, consulter et gérer sa collection.
 
@@ -605,16 +576,16 @@ SideBar (principale)          Sous-navigation (contextuelle)
 
 **Objectif** : Suivi de lecture, statistiques, outils avancés
 
-| #   | Fonctionnalité              | Justification               |
-|-----|-----------------------------|-----------------------------|
-| 2.1 | Pile à lire                 | Suivre sa progression       |
-| 2.6 | Statistiques de collection  | Visualisation (graphiques)  |
-| 2.7 | Historique de la collection | Journal des ajouts          |
-| 2.8 | Historique de lecture       | Journal des lectures        |
-| 3.3 | Planning nouveautés (T1)    | Découverte nouvelles séries |
-| 3.4 | Planning coffrets           | Éditions spéciales          |
-| 5   | Panier d'achats             | Gestion des achats intégrée |
-| 23  | Scanner code-barres         | Ajout rapide                |
+| #   | Fonctionnalité                     | Justification               |
+|-----|------------------------------------|-----------------------------|
+| 2.1 | Pile à lire                        | Suivre sa progression       |
+| 2.6 | Statistiques de collection         | Visualisation (graphiques)  |
+| 2.7 | Historique de la collection        | Journal des ajouts          |
+| 2.8 | Historique de lecture              | Journal des lectures        |
+| 3.3 | Planning nouveautés (T1)           | Découverte nouvelles séries |
+| 3.4 | Planning coffrets                  | Éditions spéciales          |
+| 5   | Panier d'achats                    | Gestion des achats intégrée |
+| 23  | Scanner code-barres ⚠️ Planifié V2 | Ajout rapide                |
 
 **Résultat** : Expérience enrichie avec tracking lecture et outils.
 
@@ -682,9 +653,9 @@ SideBar (principale)          Sous-navigation (contextuelle)
 
 ## 6. Architecture Python / PySide6
 
-### 6.1 Clean Architecture (Hexagonale)
+### 6.1 Architecture Hybride Clean + MVVM
 
-> Voir [COMMON.md § Clean Architecture](./COMMON.md#8-clean-architecture) pour le schéma complet.
+> Voir [COMMON.md § Architecture Hybride Clean + MVVM](./COMMON.md#8-architecture-hybride-clean--mvvm) pour le schéma complet.
 
 ### 6.2 Structure des dossiers
 
@@ -739,29 +710,29 @@ booksync_app_qt/
 │   ├── infrastructure/          # Implémentations concrètes
 │   │   ├── api/
 │   │   │   ├── http_client.py      # Client httpx
-│   │   │   ├── mangacollec_api.py  # API externe (catalogue)
-│   │   │   ├── auth_api.py         # API locale (auth + credentials)
+│   │   │   ├── mangacollec_api.py  # API externe (catalogue, OAuth2)
+│   │   │   ├── auth_api.py         # API locale (multi-user)
 │   │   │   ├── data_api.py         # API locale (volume_extra)
 │   │   │   └── prediction_api.py   # API locale V3 (recommandations)
 │   │   ├── cache/
-│   │   │   ├── database.py         # SQLite connection
-│   │   │   ├── models/             # SQLAlchemy models
+│   │   │   ├── store.py            # TinyDB store
 │   │   │   └── repositories/
 │   │   │       ├── volume_cache.py
 │   │   │       ├── series_cache.py
 │   │   │       └── ...
 │   │   ├── images/
 │   │   │   └── image_cache.py      # Cache couvertures
-│   │   └── scanner/
-│   │       └── barcode_scanner.py
+│   │   ├── scanner/
+│   │   │   ├── bluetooth_scanner.py  # Douchette Bluetooth
+│   │   │   └── webcam_scanner.py     # OpenCV + pyzbar
 │   │
 │   ├── presentation/            # Interface Qt
-│   │   ├── controllers/         # QObject exposés au QML
-│   │   │   ├── base_controller.py
-│   │   │   ├── collection_controller.py
-│   │   │   ├── search_controller.py
-│   │   │   ├── planning_controller.py
-│   │   │   ├── prediction_controller.py  # V3
+│   │   ├── viewmodels/          # QObject/ViewModels exposés au QML
+│   │   │   ├── base_viewmodel.py
+│   │   │   ├── collection_viewmodel.py
+│   │   │   ├── search_viewmodel.py
+│   │   │   ├── planning_viewmodel.py
+│   │   │   ├── prediction_viewmodel.py  # V3
 │   │   │   └── ...
 │   │   └── models/              # QAbstractListModel
 │   │       ├── volume_list_model.py
@@ -769,11 +740,6 @@ booksync_app_qt/
 │   │       └── ...
 │   │
 │   ├── qml/                     # Interface utilisateur
-│   │   ├── main.qml
-│   │   ├── Theme.qml
-│   │   ├── components/
-│   │   ├── layouts/
-│   │   └── pages/
 │   │
 │   └── utils/
 │       ├── config.py
@@ -790,12 +756,12 @@ booksync_app_qt/
 
 > Voir [COMMON.md § Flux de données](./COMMON.md#10-flux-de-données) pour le schéma complet.
 
-### 6.4 Exemple Controller
+### 6.4 Exemple ViewModel
 
 ```python
 from PySide6.QtCore import QObject, Signal, Slot, Property
 
-class CollectionController(QObject):
+class CollectionViewModel(QObject):
     loadingChanged = Signal()
     errorChanged = Signal()
     collectionChanged = Signal()
@@ -861,7 +827,7 @@ class CollectionController(QObject):
         self._set_error("")
 ```
 
-### 6.5 Exemple ViewModel
+### 6.5 Exemple ListModel
 
 ```python
 from PySide6.QtCore import QAbstractListModel, Qt, QModelIndex
@@ -916,7 +882,7 @@ class VolumeListModel(QAbstractListModel):
 
 ```qml
 ListView {
-    model: collectionController.volumes
+    model: collectionViewModel.volumes
     delegate: VolumeCard {
         volumeId: model.volumeId
         title: model.title
@@ -979,7 +945,8 @@ Cette section définit quels services doivent être développés pour chaque ver
 MVP:
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
 │ AuthService │────►│ SyncService │────►│ CacheManager│
-└─────────────┘     └──────┬──────┘     └─────────────┘
+│ (OAuth2)    │     └──────┬──────┘     │  (TinyDB)   │
+└─────────────┘            │            └─────────────┘
                            │
          ┌─────────────────┼─────────────────┐
          ▼                 ▼                 ▼
@@ -1026,24 +993,7 @@ V1:                 V2:                 V3:
 
 ### 7.3 Flux d'écriture
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         ACTION UTILISATEUR                          │
-│                    (ex: ajouter un tome)                            │
-└─────────────────────────────┬───────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                            SERVICE                                  │
-│                                                                     │
-│   1. Vérifier connexion → Si offline → Erreur "Mode lecture"        │
-│   2. Demander token Mangacollec à Auth API                          │
-│   3. Appel API Mangacollec (POST /possessions)                      │
-│   4. Attendre réponse avec ID                                       │
-│   5. Sauvegarder en cache local (SQLite)                            │
-│   6. Retourner succès                                               │
-└─────────────────────────────────────────────────────────────────────┘
-```
+> Voir [ARCHITECTURE.md § Stratégie de synchronisation](./ARCHITECTURE.md#52-stratégie-de-synchronisation) pour les diagrammes détaillés des flux d'écriture et de lecture.
 
 ### 7.4 Exemple Service (API-first)
 
@@ -1054,77 +1004,88 @@ class CollectionService:
         self._cache = cache
 
     async def add_to_collection(self, volume_id: str) -> Possession:
-        """Ajoute un tome - passe par l'API d'abord"""
+        """Ajoute un tome — POST /v1/possessions_multiple"""
         # 1. Vérifier la connexion
         if not self._api.is_online():
             raise OfflineError("Action impossible hors connexion")
-        
-        # 2. Appel API
+
+        # 2. Appel API (body = tableau d'objets volume_id)
         response = await self._api.post(
-            "/users/me/possessions",
-            json={"volume_id": volume_id}
+            "v1/possessions_multiple",
+            json=[{"volume_id": volume_id}]
         )
-        
-        if response.status_code != 201:
+
+        if response.status_code != 200:
             raise ApiError(response.json())
-        
-        # 3. Récupérer les données avec l'ID généré par l'API
+
+        # 3. Réponse : { possessions: [...], follow_editions: [...] }
         data = response.json()
+        possession_data = data["possessions"][0]
+
         possession = Possession(
-            id=data["id"],
-            user_id=data["user_id"],
-            volume_id=data["volume_id"],
-            created_at=data["created_at"]
+            id=possession_data["id"],
+            user_id=possession_data["user_id"],
+            volume_id=possession_data["volume_id"],
+            created_at=possession_data["created_at"]
         )
-        
+
         # 4. Sauvegarder dans le cache local
         self._cache.possessions.save(possession)
-        
+
+        # 5. Mettre à jour les follow_editions si présentes
+        for fe_data in data.get("follow_editions", []):
+            self._cache.follow_editions.save(self._map_follow_edition(fe_data))
+
         return possession
 
     async def remove_from_collection(self, volume_id: str) -> bool:
-        """Retire un tome - passe par l'API d'abord"""
+        """Retire un tome — DELETE /v1/possessions_multiple"""
         if not self._api.is_online():
             raise OfflineError("Action impossible hors connexion")
-        
+
         possession = self._cache.possessions.get_by_volume(volume_id)
         if not possession:
             return False
-        
+
+        # Body = tableau d'objets id
         response = await self._api.delete(
-            f"/users/me/possessions/{possession.id}"
+            "v1/possessions_multiple",
+            json=[{"id": possession.id}]
         )
-        
-        if response.status_code != 204:
+
+        # Réponse 200 avec { possessions: [{id, deleted}], follow_editions: [...], loans: [] }
+        if response.status_code != 200:
             raise ApiError(response.json())
-        
+
         self._cache.possessions.delete(possession.id)
         return True
 
-    async def get_collection(self, force_refresh: bool = False) -> List[Possession]:
-        """Récupère la collection"""
-        if force_refresh or self._cache.possessions.is_stale():
-            response = await self._api.get("/users/me/possessions")
-            possessions = [self._map(p) for p in response.json()]
-            self._cache.possessions.replace_all(possessions)
-        
-        return self._cache.possessions.get_all()
+    async def get_collection(self, force_refresh: bool = False) -> Collection:
+        """Récupère la collection complète — GET /v2/users/me/collection"""
+        if force_refresh or self._cache.is_stale():
+            response = await self._api.get("v2/users/me/collection")
+            data = response.json()
+            # Réponse complète : editions, series, types, kinds, volumes,
+            # possessions, follow_editions, reads, borrowers, loans, etc.
+            self._cache.replace_all_from_collection(data)
+
+        return self._cache.get_collection()
 ```
 
 ### 7.5 Cache Manager
 
 ```python
 class CacheManager:
-    def __init__(self, db_path: str):
-        self._db = Database(db_path)
-        self.possessions = PossessionCache(self._db)
-        self.volumes = VolumeCache(self._db)
-        self.series = SeriesCache(self._db)
-        self.editions = EditionCache(self._db)
+    def __init__(self, store_path: str):
+        self._db = TinyDB(config.store_path)
+        self.possessions = PossessionCache(self._db.table("possessions"))
+        self.volumes = VolumeCache(self._db.table("volumes"))
+        self.series = SeriesCache(self._db.table("series"))
+        self.editions = EditionCache(self._db.table("editions"))
 
 class PossessionCache:
-    def __init__(self, db):
-        self._db = db
+    def __init__(self, table):
+        self._table = table
         self._last_sync = None
         self._stale_after = timedelta(minutes=5)
 
@@ -1134,49 +1095,45 @@ class PossessionCache:
         return datetime.now() - self._last_sync > self._stale_after
 
     def save(self, possession: Possession):
-        self._db.execute(
-            "INSERT OR REPLACE INTO possessions VALUES (?, ?, ?, ?)",
-            (possession.id, possession.user_id, possession.volume_id, possession.created_at)
+        self._table.upsert(
+            possession.model_dump(),
+            where("id") == possession.id
         )
 
     def delete(self, possession_id: str):
-        self._db.execute("DELETE FROM possessions WHERE id = ?", (possession_id,))
+        self._table.remove(where("id") == possession_id)
 
     def replace_all(self, possessions: List[Possession]):
-        self._db.execute("DELETE FROM possessions")
+        self._table.truncate()
         for p in possessions:
             self.save(p)
         self._last_sync = datetime.now()
 
     def get_all(self) -> List[Possession]:
-        rows = self._db.execute("SELECT * FROM possessions").fetchall()
-        return [self._map(row) for row in rows]
+        return [self._map(doc) for doc in self._table.all()]
 
     def get_by_volume(self, volume_id: str) -> Optional[Possession]:
-        row = self._db.execute(
-            "SELECT * FROM possessions WHERE volume_id = ?",
-            (volume_id,)
-        ).fetchone()
-        return self._map(row) if row else None
+        docs = self._table.search(where("volume_id") == volume_id)
+        return self._map(docs[0]) if docs else None
 ```
 
 ### 7.6 Schéma récapitulatif
 
 ```
 ┌─────────────┐         ┌─────────────┐         ┌─────────────┐
-│   QML/UI    │────────►│  Controller │────────►│   Service   │
+│   QML/UI    │────────►│  ViewModel  │────────►│   Service   │
 └─────────────┘         └─────────────┘         └──────┬──────┘
                                                        │
                                         ┌──────────────┴─────────────┐
-                                        │                            │
+                                        │ (écriture / lecture)       │ (écriture / lecture)
                                         ▼                            ▼
                                ┌─────────────────┐          ┌─────────────────┐
-                               │   API Client    │          │     Cache       │
-                               │  (écriture +    │          │   (lecture)     │
-                               │   lecture)      │          │                 │
+                               │  API Client     │          │  Cache          │
+                               │   - écriture    │          │   - écriture    │
+                               │   - lecture     │          │   - lecture     │
                                └────────┬────────┘          └─────────────────┘
                                         │                            ▲
-                                        │   Après succès API         │
+                                        │   Après succès API         │ (écriture)
                                         └────────────────────────────┘
                                               Update cache
 ```
@@ -1198,28 +1155,12 @@ booksync_app_qt/
 │
 ├── src/
 │   └── booksync_app_qt/
-│       ├── __init__.py
-│       ├── __main__.py
-│       ├── app.py
-│       ├── models/
-│       ├── api/
-│       ├── cache/
-│       ├── services/
-│       ├── controllers/
-│       ├── viewmodels/
-│       └── utils/
 │
 ├── qml/
-│   ├── main.qml
-│   ├── Theme.qml
-│   ├── components/
-│   ├── layouts/
-│   ├── pages/
-│   └── utils/
 │
 ├── resources/
 │   ├── icons/
-│   ├── fonts/
+│   ├── fonts/  
 │   └── images/
 │
 ├── tests/
@@ -1236,99 +1177,7 @@ booksync_app_qt/
 
 ### 8.2 pyproject.toml
 
-```toml
-[project]
-name = "booksync_app_qt"
-version = "0.1.0"
-description = "Application de gestion de collection manga"
-authors = [
-    { name = "Ton Nom", email = "ton@email.com" }
-]
-readme = "README.md"
-license = { text = "MIT" }
-requires-python = ">=3.11"
-keywords = ["manga", "collection", "pyside6", "qml"]
-
-dependencies = [
-    "PySide6>=6.6.0",
-    "httpx>=0.27.0",
-    "sqlalchemy>=2.0.0",
-    "pydantic>=2.5.0",
-    "pydantic-settings>=2.1.0",
-    "python-dotenv>=1.0.0",
-    "aiosqlite>=0.19.0",
-    "keyring>=24.3.0",
-]
-
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.4.0",
-    "pytest-asyncio>=0.23.0",
-    "pytest-cov>=4.1.0",
-    "pytest-qt>=4.2.0",
-    "ruff>=0.1.0",
-    "mypy>=1.7.0",
-    "pre-commit>=3.6.0",
-]
-build = [
-    "pyinstaller>=6.3.0",
-    "nuitka>=1.9.0",
-]
-
-[project.scripts]
-booksync = "booksync_app_qt.__main__:main"
-
-[project.gui-scripts]
-booksync-gui = "booksync_app_qt.__main__:main"
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/booksync_app_qt"]
-
-[tool.hatch.build.targets.sdist]
-include = [
-    "src/",
-    "qml/",
-    "resources/",
-]
-
-[tool.ruff]
-target-version = "py311"
-line-length = 100
-src = ["src", "tests"]
-
-[tool.ruff.lint]
-select = ["E", "W", "F", "I", "B", "C4", "UP", "ARG", "SIM"]
-ignore = ["E501", "B008"]
-
-[tool.ruff.lint.isort]
-known-first-party = ["booksync_app_qt"]
-
-[tool.mypy]
-python_version = "3.11"
-strict = true
-warn_return_any = true
-warn_unused_ignores = true
-disallow_untyped_defs = true
-plugins = ["pydantic.mypy"]
-
-[[tool.mypy.overrides]]
-module = ["PySide6.*"]
-ignore_missing_imports = true
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-asyncio_mode = "auto"
-qt_api = "pyside6"
-addopts = ["-v", "--tb=short", "--cov=src/booksync_app_qt", "--cov-report=term-missing"]
-
-[tool.coverage.run]
-source = ["src/booksync_app_qt"]
-branch = true
-```
+> Voir [COMMON.md § Configuration du projet](./COMMON.md#14-configuration-du-projet-pyprojecttoml) pour le fichier complet.
 
 ### 8.3 .env.example
 

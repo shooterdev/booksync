@@ -1,6 +1,7 @@
 # Architecture Technique — BookSync
 
 Application desktop de gestion de collection manga pour Raspberry Pi avec écran tactile.
+Architecture hybride Clean + MVVM.
 
 > **Note** : Les informations communes avec [PRD.md](./PRD.md) sont centralisées dans [COMMON.md](./COMMON.md).
 
@@ -39,10 +40,10 @@ Application desktop de gestion de collection manga pour Raspberry Pi avec écran
 
 | Fonction                | Description                                  |
 |-------------------------|----------------------------------------------|
-| Authentification locale | JWT (access + refresh tokens) pour l'app     |
-| Credentials Mangacollec | Stockage sécurisé email/password Mangacollec |
 | Multi-utilisateur       | Profils familiaux avec sessions séparées     |
-| Proxy auth Mangacollec  | Obtention des tokens Mangacollec via OAuth2  |
+| Gestion des profils     | Création, sélection et suppression de profils |
+
+> **Note** : L'authentification Mangacollec est gérée directement par l'app via OAuth2 (grant_type: password). L'Auth API ne sert plus de proxy pour les tokens Mangacollec.
 
 ### 2.2 Détails Data API — Table `volume_extra`
 
@@ -73,7 +74,7 @@ Application desktop de gestion de collection manga pour Raspberry Pi avec écran
 /opt/booksync/
 ├── app/                    # Application PySide6
 ├── cache/
-│   ├── booksync.db        # SQLite (cache données)
+│   ├── booksync-store.json # TinyDB (cache données)
 │   └── images/            # Couvertures manga
 ├── config/
 │   └── settings.toml      # Configuration
@@ -112,117 +113,17 @@ Application desktop de gestion de collection manga pour Raspberry Pi avec écran
 
 ## 4. Architecture applicative
 
-### 4.1 Clean Architecture (Hexagonale)
+### 4.1 Architecture Hybride Clean + MVVM
 
-> Voir [COMMON.md § Clean Architecture](./COMMON.md#8-clean-architecture) pour le schéma complet.
+> Voir [COMMON.md § Architecture Hybride Clean + MVVM](./COMMON.md#8-architecture-hybride-clean--mvvm) pour le schéma complet.
+
+L'application utilise la Clean Architecture (Domain → Application → Infrastructure) avec des **ViewModels** (QObject) au lieu de Controllers pour la couche présentation Qt/QML.
 
 ### 4.2 Structure du projet frontend
 
-```
-booksync_app_qt/
-├── pyproject.toml
-├── src/booksync_app_qt/
-│   ├── __init__.py
-│   ├── __main__.py              # Entry point
-│   ├── app.py                   # QApplication setup
-│   │
-│   ├── domain/                  # Coeur métier (aucune dépendance)
-│   │   ├── entities/
-│   │   │   ├── volume.py
-│   │   │   ├── series.py
-│   │   │   ├── edition.py
-│   │   │   ├── publisher.py
-│   │   │   ├── author.py
-│   │   │   ├── user.py
-│   │   │   ├── possession.py
-│   │   │   └── ...
-│   │   ├── exceptions/
-│   │   │   ├── domain_error.py
-│   │   │   └── ...
-│   │   └── ports/               # Interfaces abstraites
-│   │       ├── volume_repository.py
-│   │       ├── api_client.py
-│   │       ├── image_cache.py
-│   │       └── ...
-│   │
-│   ├── application/             # Cas d'usage
-│   │   ├── services/
-│   │   │   ├── collection_service.py
-│   │   │   ├── reading_service.py
-│   │   │   ├── search_service.py
-│   │   │   ├── planning_service.py
-│   │   │   ├── sync_service.py
-│   │   │   ├── prediction_service.py  # V3
-│   │   │   └── ...
-│   │   └── dtos/
-│   │       ├── volume_dto.py
-│   │       └── ...
-│   │
-│   ├── infrastructure/          # Implémentations concrètes
-│   │   ├── api/
-│   │   │   ├── http_client.py      # Client httpx
-│   │   │   ├── mangacollec_api.py  # API externe (catalogue)
-│   │   │   ├── auth_api.py         # API locale (auth + credentials)
-│   │   │   ├── data_api.py         # API locale (volume_extra)
-│   │   │   └── prediction_api.py   # API locale V3 (recommandations)
-│   │   ├── cache/
-│   │   │   ├── database.py      # SQLite connection
-│   │   │   ├── models/          # SQLAlchemy models
-│   │   │   └── repositories/
-│   │   │       ├── volume_cache.py
-│   │   │       ├── series_cache.py
-│   │   │       └── ...
-│   │   ├── images/
-│   │   │   └── image_cache.py   # Cache couvertures
-│   │   └── scanner/
-│   │       └── barcode_scanner.py
-│   │
-│   ├── presentation/            # Interface Qt
-│   │   ├── controllers/         # QObject exposés au QML
-│   │   │   ├── base_controller.py
-│   │   │   ├── collection_controller.py
-│   │   │   ├── search_controller.py
-│   │   │   ├── planning_controller.py
-│   │   │   ├── prediction_controller.py  # V3
-│   │   │   └── ...
-│   │   └── models/              # QAbstractListModel
-│   │       ├── volume_list_model.py
-│   │       ├── series_list_model.py
-│   │       └── ...
-│   │
-│   ├── qml/                     # Interface utilisateur
-│   │   ├── main.qml
-│   │   ├── Theme.qml
-│   │   ├── components/
-│   │   │   ├── cards/
-│   │   │   ├── badges/
-│   │   │   ├── inputs/
-│   │   │   └── ...
-│   │   ├── layouts/
-│   │   │   ├── MainLayout.qml
-│   │   │   ├── SideBar.qml
-│   │   │   └── ...
-│   │   └── pages/
-│   │       ├── home/
-│   │       ├── news/
-│   │       ├── collection/
-│   │       ├── planning/
-│   │       ├── search/
-│   │       ├── cart/
-│   │       ├── settings/
-│   │       ├── prediction/     # V3
-│   │       └── catalogue/
-│   │
-│   └── utils/
-│       ├── config.py
-│       ├── logger.py
-│       └── constants.py
-│
-└── tests/
-    ├── unit/
-    ├── integration/
-    └── conftest.py
-```
+> Voir [COMMON.md § Structure des écrans QML](./COMMON.md#12-structure-des-écrans-qml) pour l'arborescence complète du dossier `qml/`.
+
+La structure Python suit l'architecture Clean + MVVM : `domain/` → `application/` → `infrastructure/` → `presentation/`.
 
 ### 4.3 Flux de données
 
@@ -254,22 +155,22 @@ booksync_app_qt/
 │            │                     │                     │             │
 │            ▼                     ▼                     ▼             │
 │   ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐   │
-│   │ • Catalogue      │  │ • Auth locale    │  │ • volume_extra   │   │
-│   │ • Séries         │  │   (JWT)          │  │   - dimensions   │   │
-│   │ • Éditions       │  │                  │  │   - Etc ...      │   │
-│   │ • Volumes        │  │ • Credentials    │  │                  │   │
-│   │ • Planning       │  │   Mangacollec    │  │ • Embeddings V3  │   │
-│   │ • Collection     │  │   (email/pwd)    │  │   (predictions)  │   │
+│   │ • Catalogue      │  │ • Multi-user     │  │ • volume_extra   │   │
+│   │ • Séries         │  │   (profils       │  │   - dimensions   │   │
+│   │ • Éditions       │  │    familiaux)    │  │   - Etc ...      │   │
+│   │ • Volumes        │  │                  │  │                  │   │
+│   │ • Planning       │  │ • Sessions       │  │ • Embeddings V3  │   │
+│   │ • Collection     │  │   JWT locales    │  │   (predictions)  │   │
 │   │ • Possessions    │  │                  │  │                  │   │
-│   │ • Lectures       │  │ • Multi-user     │  │ Alimenté par     │   │
-│   │ • Ect ...        │  │   (profils)      │  │ Scraping (Scrapy)│   │
+│   │ • Lectures       │  │ (Ne stocke PAS   │  │ Alimenté par     │   │
+│   │ • Ect ...        │  │  les creds MC)   │  │ Scraping (Scrapy)│   │
 │   └──────────────────┘  └──────────────────┘  └──────────────────┘   │
 │            │                     │                     │             │
 │            └─────────────────────┼─────────────────────┘             │
 │                                  │                                   │
 │                                  ▼                                   │
 │                       ┌──────────────────────┐                       │
-│                       │  Cache SQLite local  │                       │
+│                       │  Cache TinyDB local  │                       │
 │                       │  + Images couvertures│                       │
 │                       │  (Mode offline: R/O) │                       │
 │                       └──────────────────────┘                       │
@@ -279,13 +180,7 @@ booksync_app_qt/
 
 **Répartition des responsabilités :**
 
-| Source              | Responsabilité                                                 | Connexion            |
-|---------------------|----------------------------------------------------------------|----------------------|
-| **API Mangacollec** | Catalogue complet, collection, planning, possessions, lectures | Directe depuis l'app |
-| **Auth API locale** | JWT local, credentials Mangacollec, profils multi-utilisateur  | Serveur/NAS          |
-| **Data API locale** | volume_extra (dimensions, poids, pages) via scraping           | Serveur/NAS          |
-| **Prediction API**  | Recommandations de lecture (V3, embeddings pgvector)           | Serveur/NAS          |
-| **Cache SQLite**    | Performance + mode offline (lecture seule)                     | Local RPi            |
+> Voir [COMMON.md § Sources de données](./COMMON.md#2-sources-de-données) pour le tableau complet.
 
 ### 5.2 Stratégie de synchronisation
 
@@ -297,7 +192,7 @@ booksync_app_qt/
 │   1. Action utilisateur (ex: ajouter un tome)                       │
 │                        │                                            │
 │                        ▼                                            │
-│   2. Controller → Service.add_volume(volume_id)                     │
+│   2. ViewModel → Service.add_volume(volume_id)                      │
 │                        │                                            │
 │                        ▼                                            │
 │   3. Vérifier connexion ────► Si offline → Erreur "Mode lecture"    │
@@ -340,7 +235,18 @@ booksync_app_qt/
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-### 5.3 Cache local SQLite
+### 5.3 Gestion des erreurs réseau
+
+| Erreur | Comportement | Détails |
+|--------|-------------|---------|
+| **Timeout** | Retry avec backoff exponentiel | 3 tentatives max (1s → 2s → 4s) |
+| **Pas de connexion** | Banner d'erreur non-bloquant | Message : "Connexion impossible — mode lecture seule" |
+| **Erreur serveur (5xx)** | Message utilisateur | "Le serveur est temporairement indisponible, réessayez plus tard" |
+| **Erreur client (4xx)** | Log + message contextuel | Détail de l'erreur API si disponible |
+
+> **Principe** : L'application ne crash jamais sur une erreur réseau. Le mode offline (lecture seule) prend le relais automatiquement.
+
+### 5.4 Cache local TinyDB
 
 **Durée de validité par type de données :**
 
@@ -351,7 +257,73 @@ booksync_app_qt/
 | Planning sorties            | 1h        | Mises à jour quotidiennes                  |
 | Images couvertures          | Permanent | Stockage définitif                         |
 
-### 5.4 Cache des images
+#### Structure du store local (`booksync-store.json`)
+
+Le cache local est un fichier JSON unique qui reproduit les données de l'API Mangacollec dans un format normalisé. Le fichier de référence se trouve dans `docs/booksync_store.json`.
+
+**Pattern normalisé standard :**
+
+La majorité des entités suivent le même pattern :
+
+```json
+{
+  "nomEntite": {
+    "data": {
+      "<uuid>": { /* objet entité */ }
+    },
+    "ordered": ["<uuid>", ...] | null
+  }
+}
+```
+
+- `data` : dictionnaire clé=UUID, valeur=objet entité (accès O(1) par ID)
+- `ordered` : liste ordonnée d'UUIDs pour l'affichage (ou `null` si pas d'ordre défini)
+
+**Entités suivant le pattern normalisé :**
+
+| Clé store          | Entité          | Champs ordered | Description                              |
+|---------------------|-----------------|----------------|------------------------------------------|
+| `volumes`          | Volume          | `null`         | Tomes individuels (isbn, image, date...) |
+| `editions`         | Edition         | `null`         | Éditions liées à une série et éditeur    |
+| `series`           | Series          | ✅ liste UUID  | Séries manga (titre, type, genres)       |
+| `tasks`            | Task            | `null`         | Relations auteur-métier-série            |
+| `authors`          | Author          | ✅ liste UUID  | Auteurs (nom, prénom)                    |
+| `publishers`       | Publisher       | ✅ liste UUID  | Éditeurs                                 |
+| `types`            | Type            | `null`         | Types de contenu (Manga, Comics...)      |
+| `jobs`             | Job             | `null`         | Métiers (Dessin, Scénario...)            |
+| `kinds`            | Kind            | `null`         | Genres/tags avec `series_ids`            |
+| `boxes`            | Box             | `null`         | Coffrets / éditions limitées             |
+| `boxEditions`      | BoxEdition      | `null`         | Éditions de coffrets                     |
+| `boxVolumes`       | BoxVolume       | `null`         | Liaisons coffret ↔ volume                |
+| `followEditions`   | FollowEdition   | `null`         | Suivi d'éditions par l'utilisateur       |
+| `possessions`      | Possession      | `null`         | Volumes possédés par l'utilisateur       |
+| `boxFollowEditions`| BoxFollowEdition| `null`         | Suivi de box éditions par l'utilisateur  |
+| `boxPossessions`   | BoxPossession   | `null`         | Coffrets possédés par l'utilisateur      |
+| `readEditions`     | ReadEdition     | `null`         | Éditions en cours de lecture             |
+| `reads`            | Read            | `null`         | Volumes lus par l'utilisateur            |
+| `borrowers`        | Borrower        | `null`         | Emprunteurs / lieux de stockage          |
+| `loans`            | Loan            | `null`         | Prêts actifs                             |
+| `amazonOffers`     | AmazonOffer     | `null`         | Offres marchandes Amazon                 |
+| `bdfugueOffers`    | BdfugueOffer    | `null`         | Offres marchandes BDfugue                |
+| `polls`            | Poll            | `null`         | Sondages                                 |
+| `pollQuestions`    | PollQuestion    | `null`         | Questions de sondage                     |
+| `pollChoices`      | PollChoice      | `null`         | Choix de sondage                         |
+| `pollAnswers`      | PollAnswer      | `null`         | Réponses de sondage                      |
+
+**Entités avec structure spécifique (hors pattern normalisé) :**
+
+| Clé store           | Structure                                                                 |
+|----------------------|---------------------------------------------------------------------------|
+| `user`              | Objet plat — profil utilisateur courant avec `subscriptions` (tableau)    |
+| `news`              | `{ volumes: [uuid], boxes: [uuid] }` — IDs des dernières sorties         |
+| `planning`          | `{ "YYYY-MM": { volumes: [uuid], boxes: [uuid] } }` — planning par mois |
+| `recommendation`    | `{ series_id: [edition_id, [series_ids]] }` — recommandations            |
+| `nativeAd`          | Objet — publicités natives (bannière, planning perso)                    |
+| `cart`              | Objet — panier actif avec `items` (tableau) et `box_items` (tableau)     |
+| `publicCollection`  | Objet — collection publique d'un autre utilisateur                       |
+| `publicUser`        | Objet — profil public d'un autre utilisateur                             |
+
+### 5.5 Cache des images
 
 ```
 cache/images/
@@ -382,55 +354,11 @@ cache/images/
 
 ### 6.2 Composants réutilisables
 
-```
-qml/components/
-├── cards/
-│   ├── VolumeCard.qml      # Carte tome avec couverture
-│   ├── SeriesCard.qml      # Carte série
-│   ├── BoxCard.qml         # Carte coffret
-│   └── StatCard.qml        # Carte statistique
-├── badges/
-│   ├── BadgeOwned.qml      # Indicateur "Possédé"
-│   ├── BadgeRead.qml       # Indicateur "Lu"
-│   ├── BadgeLast.qml       # "Dernier tome"
-│   └── GenreChip.qml       # Tag genre
-├── inputs/
-│   ├── SearchBar.qml       # Barre de recherche
-│   ├── FilterDropdown.qml  # Menu déroulant filtres
-│   └── DateNavigator.qml   # Navigation temporelle
-└── common/
-    ├── ActionButton.qml    # Bouton action
-    ├── ProgressBar.qml     # Barre de progression
-    ├── LoadingSpinner.qml  # Indicateur chargement
-    └── ConfirmDialog.qml   # Dialogue confirmation
-```
+> Voir [COMMON.md § Structure des écrans QML](./COMMON.md#12-structure-des-écrans-qml) pour la structure complète du dossier `qml/components/`.
 
 ### 6.3 Navigation
 
-```
-┌────────────────────────────────────────────────────────────────────┐
-│  SideBar                    │           Contenu principal          │
-│  (permanente)               │                                      │
-├─────────────────────────────┼──────────────────────────────────────┤
-│                             │                                      │
-│  ┌─────────────────────┐    │   ┌───────────────────────────────┐  │
-│  │ 🏠 Accueil          │    │   │      SubNavBar (optionnel)    │  │
-│  ├─────────────────────┤    │   └───────────────────────────────┘  │
-│  │ 📚 Collection       │────┼──► Pile | Coll | Compléter | ...     │
-│  ├─────────────────────┤    │                                      │
-│  │ 🎯 Prediction (V3)  │────┼──► Recommandation | Historique       │
-│  ├─────────────────────┤    │                                      │
-│  │ 📅 Planning         │────┼──► Perso | Tout | Nouveautés | ...   │
-│  ├─────────────────────┤    │                                      │
-│  │ 🔍 Recherche        │────┼──► Titres | Auteurs | Éditeurs       │
-│  ├─────────────────────┤    │                                      │
-│  │ 🛒 Panier           │    │                                      │
-│  ├─────────────────────┤    │                                      │
-│  │ ⚙️ Paramètres       │    │                                      │
-│  └─────────────────────┘    │                                      │
-│                             │                                       │
-└─────────────────────────────┴───────────────────────────────────────┘
-```
+> Voir [COMMON.md § Navigation](./COMMON.md#13-navigation) pour le schéma complet de la navigation.
 
 ---
 
@@ -442,17 +370,24 @@ qml/components/
 
 **Détails d'implémentation :**
 
-| Aspect                  | Implémentation                                     |
-|-------------------------|----------------------------------------------------|
-| Token local             | Sans expiration (valide tant que non révoqué)      |
-| Stockage token local    | keyring (système OS sur RPi)                       |
-| Tokens Mangacollec      | Demandés à Auth API avant chaque appel Mangacollec |
-| Refresh automatique     | Auth API refresh le token si expiré                |
-| Credentials Mangacollec | Chiffrés en BDD PostgreSQL                         |
-| Hachage mots de passe   | bcrypt (côté Auth API)                             |
-| Multi-utilisateur       | Profils séparés avec sessions isolées              |
+| Aspect                  | Implémentation                                          |
+|-------------------------|---------------------------------------------------------|
+| Tokens Mangacollec      | OAuth2 direct (access + refresh), stockés dans keyring  |
+| Refresh automatique     | L'app refresh le token si expiré (réponse 401)          |
+| Credentials Mangacollec | Email/password stockés dans keyring (OS)                |
+| Multi-utilisateur       | Profils séparés via Auth API locale                     |
 
-### 7.2 Communication
+### 7.2 Gestion des erreurs token
+
+| État | Action automatique | Fallback |
+|------|-------------------|----------|
+| **TokenOutdated** | Refresh automatique via Auth API | — |
+| **TokenRefreshFailed** | Ré-authentification complète (login) | Écran de connexion |
+| **RequestUnauthorized** (401) | Refresh token + retry de la requête | Ré-authentification si retry échoue |
+
+> **Flux** : Toute réponse 401 déclenche un refresh transparent. Si le refresh échoue, l'utilisateur est redirigé vers l'écran de connexion.
+
+### 7.3 Communication
 
 | Aspect     | Implémentation                             |
 |------------|--------------------------------------------|
@@ -460,13 +395,14 @@ qml/components/
 | Réseau     | LAN uniquement (pas d'exposition Internet) |
 | Validation | Pydantic côté client et serveur            |
 
-### 7.3 Données locales
+### 7.4 Données locales
 
-| Donnée       | Protection                |
-|--------------|---------------------------|
-| Tokens JWT   | keyring système           |
-| Cache SQLite | Permissions fichier (600) |
-| Images       | Permissions fichier (644) |
+| Donnée              | Protection                |
+|---------------------|---------------------------|
+| Tokens Mangacollec  | keyring système           |
+| Credentials         | keyring système           |
+| Cache TinyDB        | Permissions fichier (600) |
+| Images              | Permissions fichier (644) |
 
 ---
 
@@ -476,12 +412,7 @@ qml/components/
 
 > Voir [COMMON.md § Architecture Git](./COMMON.md#11-architecture-git) pour la structure multi-repos avec submodules.
 
-Le projet est organisé en monorepo avec submodules :
-
-```bash
-# Cloner le projet complet
-git clone --recurse-submodules git@github.com:shooterdev/booksync.git
-```
+Le projet est organisé en monorepo avec submodules. Voir les commandes dans [COMMON.md § Architecture Git](./COMMON.md#11-architecture-git).
 
 ### 8.2 Variables d'environnement
 
@@ -568,36 +499,9 @@ WantedBy=graphical.target
 
 ## Annexes
 
-### A. Dépendances Python (pyproject.toml)
+### A. Configuration du projet (pyproject.toml)
 
-```toml
-[project]
-name = "booksync-app-qt"
-version = "0.1.0"
-requires-python = ">=3.11"
-
-dependencies = [
-    "PySide6>=6.6.0",
-    "httpx>=0.27.0",
-    "sqlalchemy>=2.0.0",
-    "aiosqlite>=0.19.0",
-    "pydantic>=2.5.0",
-    "pydantic-settings>=2.1.0",
-    "keyring>=24.3.0",
-    "python-dotenv>=1.0.0",
-]
-
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.4.0",
-    "pytest-asyncio>=0.23.0",
-    "pytest-qt>=4.2.0",
-    "pytest-cov>=4.1.0",
-    "ruff>=0.1.0",
-    "black>=24.0.0",
-    "mypy>=1.7.0",
-]
-```
+> Voir [COMMON.md § Configuration du projet](./COMMON.md#14-configuration-du-projet-pyprojecttoml) pour le fichier complet.
 
 ### B. Compatibilité Raspberry Pi
 
@@ -607,7 +511,7 @@ dev = [
 | Qt 6        | ✅                | ✅                 |
 | OpenGL ES   | ✅ (VideoCore VI) | ✅ (VideoCore VII) |
 | SQLite      | ✅                | ✅                 |
-| Python 3.11 | ✅                | ✅                 |
+| Python 3.12 | ✅                | ✅                 |
 
 ### C. Glossaire
 

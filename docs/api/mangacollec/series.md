@@ -461,7 +461,7 @@ Structure d'un volume.
     "number": "integer",
     "release_date": "date",
     "isbn": "string",
-    "asin": "string",
+    "asin": "string | null",
     "edition_id": "string",
     "possessions_count": "integer",
     "not_sold": "boolean",
@@ -478,7 +478,7 @@ Structure d'un volume.
 | number            | integer | Non      | Numéro du volume                          |
 | release_date      | date    | Non      | Date de sortie (YYYY-MM-DD)               |
 | isbn              | string  | Non      | Code ISBN-13                              |
-| asin              | string  | Non      | Code ASIN Amazon                          |
+| asin              | string  | Oui      | Code ASIN Amazon                          |
 | edition_id        | string  | Non      | Identifiant de l'édition                  |
 | possessions_count | integer | Non      | Nombre d'utilisateurs possédant ce volume |
 | not_sold          | boolean | Non      | Indique si le volume n'est plus vendu     |

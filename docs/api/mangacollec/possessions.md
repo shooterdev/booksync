@@ -55,6 +55,8 @@ Ajoute plusieurs volumes à la collection de l'utilisateur.
 }
 ```
 
+> **Note** : Le `follow_edition` retourné ici ne contient pas `updated_at`, contrairement au schéma complet (voir [collection.md](collection.md#schéma-followedition)).
+
 ---
 
 ## DELETE /v1/possessions_multiple

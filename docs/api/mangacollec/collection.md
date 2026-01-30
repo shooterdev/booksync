@@ -370,7 +370,7 @@ Structure d'un volume (version collection).
     "number": "integer",
     "release_date": "date",
     "isbn": "string",
-    "asin": "string",
+    "asin": "string | null",
     "edition_id": "string",
     "possessions_count": "integer",
     "not_sold": "boolean",
@@ -387,7 +387,7 @@ Structure d'un volume (version collection).
 | number            | integer | Non      | Numéro du volume                          |
 | release_date      | date    | Non      | Date de sortie (YYYY-MM-DD)               |
 | isbn              | string  | Non      | Code ISBN-13                              |
-| asin              | string  | Non      | Code ASIN Amazon                          |
+| asin              | string  | Oui      | Code ASIN Amazon                          |
 | edition_id        | string  | Non      | Identifiant de l'édition                  |
 | possessions_count | integer | Non      | Nombre d'utilisateurs possédant ce volume |
 | not_sold          | boolean | Non      | Indique si le volume n'est plus vendu     |
@@ -662,6 +662,8 @@ Structure d'un emprunteur ou lieu de stockage.
 | title      | string   | Non      | Nom de l'emprunteur ou du lieu                |
 | category   | string   | Non      | Catégorie : "person" ou "storage"             |
 | created_at | datetime | Non      | Date de création (ISO 8601)                   |
+
+> **Note** : Lors de la création via `POST /v2/borrowers`, la réponse inclut également `updated_at` (voir [loans.md](loans.md)).
 
 ---
 
